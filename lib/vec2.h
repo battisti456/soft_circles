@@ -1,4 +1,10 @@
 /*
+This file is based on code provided under Chan Jer Shyan under the MIT License,
+however this exact version of this file is restricted to the same license as the rest of the repository.
+
+The original header is included underneath.
+*/
+/*
 Copyright (c) 2020 Chan Jer Shyan
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -38,10 +44,10 @@ public:
 		return *this;
 	}
 	
-	vec2 operator+(vec2& v) {
+	vec2 operator+(const vec2& v) const {
 		return vec2(x + v.x, y + v.y);
 	}
-	vec2 operator-(vec2& v) {
+	vec2 operator-(const vec2& v) const {
 		return vec2(x - v.x, y - v.y);
 	}
 	
@@ -56,16 +62,16 @@ public:
 		return *this;
 	}
 	
-	vec2 operator+(double s) {
+	vec2 operator+(double s) const {
 		return vec2(x + s, y + s);
 	}
-	vec2 operator-(double s) {
+	vec2 operator-(double s) const {
 		return vec2(x - s, y - s);
 	}
-	vec2 operator*(double s) {
+	vec2 operator*(double s) const {
 		return vec2(x * s, y * s);
 	}
-	vec2 operator/(double s) {
+	vec2 operator/(double s) const {
 		return vec2(x / s, y / s);
 	}
 	
@@ -129,14 +135,19 @@ public:
 		return vec2(y, -x);
 	}
 	
-	static float dot(vec2 v1, vec2 v2) {
+	static float dot(vec2 const &v1, vec2 const &v2) {
 		return v1.x * v2.x + v1.y * v2.y;
 	}
-	static float cross(vec2 v1, vec2 v2) {
+	static float cross(vec2 const &v1, vec2 const &v2) {
 		return (v1.x * v2.y) - (v1.y * v2.x);
 	}
 	
 };
+
+template <class T>
+vec2<T> operator*(T val, vec2<T> const & vec){
+	return vec*val;
+}
 
 typedef vec2<float> vec2f;
 typedef vec2<double> vec2d;

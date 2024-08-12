@@ -102,7 +102,7 @@ static PyObject *method_add_soft_circle_to_eval_space(PyObject *self, PyObject *
     if(!PyArg_ParseTuple(args,"OO",&es_capsule,&sc_capsule)){return NULL;}
     sc_type *sc = get_ptr<sc_type>(sc_capsule);
     es_type *es = get_ptr<es_type>(es_capsule);
-    es->add_soft_circle(*sc);
+    //es->add_soft_circle(*sc);
 }
 
 static PyObject *method_remove_soft_circle_from_eval_space(PyObject *self, PyObject *args){
@@ -110,7 +110,7 @@ static PyObject *method_remove_soft_circle_from_eval_space(PyObject *self, PyObj
     if(!PyArg_ParseTuple(args,"OO",&es_capsule,&sc_capsule)){return NULL;}
     sc_type *sc = get_ptr<sc_type>(sc_capsule);
     es_type *es = get_ptr<es_type>(es_capsule);
-    es->remove_soft_circle(*sc);
+    //es->remove_soft_circle(*sc);
 }
 
 template <class T>
@@ -118,8 +118,8 @@ static PyObject * method_tick(PyObject *self, PyObject *args){
     num_type dt;
     PyObject *capsule;
     if(!PyArg_ParseTuple(args,"Od",&capsule,&dt)){return NULL;};
-    es_typTe *es = get_ptr<T>(capsule);
-    es->tick(dt);
+    T *item = get_ptr<T>(capsule);
+    item->tick(dt);
     return Py_None;
 }
 

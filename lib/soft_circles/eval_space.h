@@ -13,7 +13,7 @@ class Soft_Circle_Link{
     public:
         Soft_Circle_Link(Soft_Circle<T> *sc){soft_circle = sc;};
         Soft_Circle_Link(Soft_Circle<T> *sc, Soft_Circle_Link<T> *next_link){soft_circle = sc; next = next_link;};
-        ~Soft_Circle_Link(){delete *next;};
+        ~Soft_Circle_Link(){delete next;};
 
         Soft_Circle<T>* get_soft_circle() const {return soft_circle;};
         Soft_Circle_Link<T>* get_next() const {return next;};
@@ -41,8 +41,8 @@ class Eval_Space{
         void clear_divs() const;
         void clear_div(int i) const;
 
-        void add_soft_circle(Soft_Circle<T> &sc) const;
-        void remove_soft_circle(Soft_Circle<T> &sc) const;
+        void add_soft_circle(Soft_Circle<T> const &sc) const;
+        void remove_soft_circle(Soft_Circle<T> const &sc) const;
 
         void evaluate_forces() const;
         void tick_soft_circles(T t) const;
@@ -73,7 +73,7 @@ void Eval_Space<T>::make_divs() {
     clear_divs();
     vec2<T> pos;
     int j,k;
-    for (Soft_Circle<T> const& sc : scs) {
+    for (Soft_Circle<T> const& sc : lst) {
         pos = sc.get_pos()
         j = (int) (pos.x/x_div_size);
         k = (int) (pos.y/y_div_size);
@@ -94,13 +94,13 @@ void Eval_Space<T>::clear_divs() const {
 }
 
 template<class T>
-void Eval_Space<T>::add_soft_circle(Soft_Circle<T> &sc) const {
+void Eval_Space<T>::add_soft_circle(Soft_Circle<T> const &sc) const {
     lst.push_back(sc);
 }
 
 template<class T>
-void Eval_Space<T>::remove_soft_circle(Soft_Circle<T> &sc) const {
-    scs.remove(sc);
+void Eval_Space<T>::remove_soft_circle(Soft_Circle<T> const &sc) const {
+    lst.remove(sc);
 }
 
 template <class T>
@@ -113,8 +113,8 @@ void Eval_Space<T>::clear_div(int i) const {
 
 template <class T>
 void Eval_Space<T>::evaluate_forces() const {
-    Soft_Circle* sc, o_sc;
-    Soft_Circle_Link* scl, o_scl;
+    Soft_Circle<T> *sc, *o_sc;
+    Soft_Circle_Link<T> *scl, *o_scl;
     for(int j = 0; j < num_div_x; j++) {
         for(int k = 0; k < num_div_y; k++) {
             scl = divs[j+k*num_div_x];
@@ -141,7 +141,7 @@ void Eval_Space<T>::evaluate_forces() const {
 
 template <class T>
 void Eval_Space<T>::tick_soft_circles(T t) const {
-    for(Soft_Circle<T> &sc : scs) {
+    for(Soft_Circle<T> & sc : lst) {
         sc.tick(t);
     }
 }

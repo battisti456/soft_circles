@@ -69,7 +69,7 @@ template <class T>
 void Soft_Circle<T>::tick(T dt) {
     acc = net_force/m;
     net_force.set(0,0);
-    pos += vel*dt + 1/2*acc*dt*dt;
+    pos += vel*dt + acc*(dt*dt/2);
     vel += acc*dt;
 };
 
