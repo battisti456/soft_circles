@@ -1,6 +1,6 @@
 from typing import TYPE_CHECKING
 
-from .soft_circles_module import make_eval_space, add_soft_circle_to_eval_space, remove_soft_circle_from_eval_space
+from .soft_circles_module import make_eval_space, add_soft_circle_to_eval_space, remove_soft_circle_from_eval_space, delete_eval_space
 
 if TYPE_CHECKING:
     from .soft_circles_module import EvalSpaceReference
@@ -15,3 +15,5 @@ class Eval_Space():
     def remove(self,*args:Soft_Circle):
         for sc in args:
             remove_soft_circle_from_eval_space(self.___reference,sc.___reference)
+    def __del__(self):
+        delete_eval_space(self.___reference)

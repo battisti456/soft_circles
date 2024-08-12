@@ -21,14 +21,20 @@ def get_soft_circle_acceleration(scr:SoftCircleReference,/) -> tuple[float,float
 def get_soft_circle_constants(scr:SoftCircleReference,/) -> SoftCircleConstants:
     ...
 
-def make_eval_space(x_size:float,y_size:float,x_divs:int,y_divs:int) -> EvalSpaceReference:
+def make_eval_space(x_size:float,y_size:float,x_divs:int,y_divs:int,/) -> EvalSpaceReference:
     ...
 
-def add_soft_circle_to_eval_space(eval_space:EvalSpaceReference,soft_circle:SoftCircleReference) -> None:
+def add_soft_circle_to_eval_space(eval_space:EvalSpaceReference,soft_circle:SoftCircleReference,/) -> None:
     ...
 
-def remove_soft_circle_from_eval_space(eval_space:EvalSpaceReference,soft_circle:SoftCircleReference) -> None:
+def remove_soft_circle_from_eval_space(eval_space:EvalSpaceReference,soft_circle:SoftCircleReference,/) -> None:
     ...
 
-def tick_eval_space(es:EvalSpaceReference,dt:float) -> None:
+def tick_eval_space(es:EvalSpaceReference,dt:float,/) -> None:
+    ...
+
+def delete_soft_circle(sc:SoftCircleReference,/) -> None:
+    ...
+
+def delete_eval_space(es:EvalSpaceReference,/) -> None:
     ...

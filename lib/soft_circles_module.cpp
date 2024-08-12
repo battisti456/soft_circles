@@ -28,6 +28,13 @@ template <class T>
 static PyObject *store_ptr(T* ptr){
     return PyCapsule_New(ptr,NULL,NULL);
 }
+template <class T>
+static PyObject *method_delete(PyObject *self, PyObject *args){
+    PyObject *capsule;
+    if(!PyArg_ParseTuple(args,"O",&capsule)){return NULL;}
+    T *item = get_ptr<T>(capsule);
+    delete item;
+}
 
 static PyObject *PyTuple_FromVec2(vec2<num_type> &vec){
     PyObject* to_return = PyTuple_New(2);
@@ -127,6 +134,8 @@ static PyMethodDef SoftCirclesMethods[] = {
     {"remove_soft_circle_from_eval_space",method_remove_soft_circle_from_eval_space, METH_VARARGS, ""},
     {"tick_eval_space",method_tick<es_type>, METH_VARARGS, ""},
     {"tick_soft_circle",method_tick<sc_type>, METH_VARARGS, ""},
+    {"delete_soft_circle",method_delete<sc_type>, METH_VARARGS, ""},
+    {"delete_eval_space",method_delete<es_type>, METH_VARARGS, ""},
     {NULL, NULL, 0, NULL}
 };
 

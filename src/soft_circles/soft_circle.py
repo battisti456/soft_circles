@@ -1,6 +1,6 @@
 from typing import TYPE_CHECKING
 
-from .soft_circles_module import make_soft_circle, get_soft_circle_position, get_soft_circle_velocity, get_soft_circle_acceleration
+from .soft_circles_module import make_soft_circle, get_soft_circle_position, get_soft_circle_velocity, get_soft_circle_acceleration, delete_soft_circle
 
 if TYPE_CHECKING:
     from .soft_circles_module import SoftCircleReference
@@ -18,4 +18,6 @@ class Soft_Circle(object):
     @property
     def acceleration(self) -> tuple[float,float]:
         return get_soft_circle_acceleration(self.___reference)
+    def __del__(self):
+        delete_soft_circle(self.___reference)
 
