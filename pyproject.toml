@@ -1,0 +1,13 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "soft_circles"
+version = "0.0.1"
+requires-python = ">= 3.12"
+authors = [
+    {name = "Autumn Battisti", email = "battisti456@gmail.com"}
+]
+description = "A module for a custom physics engine coded in cpp, based around round objects with 'soft' physics."
+readme="README.md"
