@@ -19,6 +19,8 @@ class Soft_Circle {
         T k;//the k parameter in s(d) = t(1/(1+exp(-kd))^a*(1+b)-b
         T a;//the a parameter in s(d) = t(1/(1+exp(-kd))^a*(1+b)-b
         T b;//the b parameter in s(d) = t(1/(1+exp(-kd))^a*(1+b)-b
+
+        bool immovable = false;
     public:
         Soft_Circle(T s_m, T s_r, T s_f, T s_t, T s_k, T s_a, T s_b);
 
@@ -28,8 +30,12 @@ class Soft_Circle {
         vec2<T> repelling_force(Soft_Circle<T>* other) const;
         vec2<T> friction_force(Soft_Circle<T>* other) const;
 
-        void set_pos(T x, T y) {pos = {x,y};};
-        void set_pos(vec2<T> new_pos) {pos = new_pos;};
+        void set_pos(T x, T y) {pos.set(x,y);};
+        void set_pos(vec2<T> new_pos) {pos.set(new_pos.x,new_pos.y);};
+        void set_vel(T x, T y) {vel.set(x,y);};
+        void set_vel(vec2<T> new_vel) {vel.set(new_vel.x,new_vel.y);};
+        void set_acc(T x, T y) {acc.set(x,y);};
+        void set_acc(vec2<T> new_acc) {acc.set(new_acc.x,new_acc.y);};
         
         vec2<T> get_pos() const {return pos;};
         vec2<T> get_vel() const {return vel;};
@@ -41,6 +47,11 @@ class Soft_Circle {
         T get_k() const {return k;};
         T get_a() const {return a;};
         T get_b() const {return b;};
+
+        bool is_immovable() const {return immovable;}
+        void set_is_immovable(bool set_value) {immovable = set_value;}
+
+        bool operator==(const Soft_Circle<T> & sc) const {return this == &sc;};
 };
 
 template <class T>
@@ -67,10 +78,13 @@ void Soft_Circle<T>::include(Soft_Circle<T>* other) {
 
 template <class T>
 void Soft_Circle<T>::tick(T dt) {
-    acc = net_force/m;
+    if (immovable){
+    } else {
+        set_acc(net_force/m);
+    }
     net_force.set(0,0);
-    pos += vel*dt + acc*(dt*dt/2);
-    vel += acc*dt;
+    set_pos(pos + vel*dt + acc*(dt*dt/2));
+    set_vel(vel + acc*dt);
 };
 
 template <class T>

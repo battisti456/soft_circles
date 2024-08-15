@@ -112,17 +112,17 @@ public:
 		y = ty;
 	}
 	
-	vec2& normalize() {
-		if (length() == 0) return *this;
-		*this *= (1.0 / length());
-		return *this;
+	vec2 normalize() const {
+		T len = length();
+		if (len == 0) return *this;
+		return *this / len;
 	}
 	
-	float dist(vec2 v) const {
+	T dist(vec2 v) const {
 		vec2 d(v.x - x, v.y - y);
 		return d.length();
 	}
-	float length() const {
+	T length() const {
 		return std::sqrt(x * x + y * y);
 	}
 	void truncate(double length) {
@@ -135,10 +135,10 @@ public:
 		return vec2(y, -x);
 	}
 	
-	static float dot(vec2 const &v1, vec2 const &v2) {
+	static T dot(vec2 const &v1, vec2 const &v2) {
 		return v1.x * v2.x + v1.y * v2.y;
 	}
-	static float cross(vec2 const &v1, vec2 const &v2) {
+	static T cross(vec2 const &v1, vec2 const &v2) {
 		return (v1.x * v2.y) - (v1.y * v2.x);
 	}
 	
