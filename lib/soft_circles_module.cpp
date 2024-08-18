@@ -69,6 +69,9 @@ static PyObject *method_make_soft_circle(PyObject *self, PyObject *args){
         return NULL;
     }
     sc_type *sc = new sc_type(m,r,f,t,k,a,b);
+    #ifdef DEBUG_EVAL_TICK
+        printf("Created SC %llu\n", (unsigned __int64) sc);
+    #endif
     return store_ptr<sc_type>(sc);
 }
 
@@ -83,6 +86,21 @@ static PyObject *method_set_soft_circle_is_immovable(PyObject *self, PyObject *a
     bool value;
     if(!PyArg_ParseTuple(args,"Op",&capsule,&value)){return NULL;};
     get_ptr<sc_type>(capsule)->set_is_immovable(value);
+    return Py_None;
+}
+
+static PyObject *method_get_soft_circle_out_of_scope_behavior(PyObject *self, PyObject *args){
+    PyObject *capsule;
+    if(!PyArg_ParseTuple(args,"O",&capsule)){return NULL;};
+    return PyLong_FromLong((long int)get_ptr<sc_type>(capsule)->get_oosb());
+}
+
+static PyObject *method_set_soft_circle_out_of_scope_behavior(PyObject *self, PyObject *args){
+    PyObject *capsule;
+    unsigned int oosb;
+    if(!PyArg_ParseTuple(args,"Ok",&capsule,&oosb)){return NULL;};
+    sc_type *es = get_ptr<sc_type>(capsule);
+    es->set_oosb((OutOfScopeBehavior) oosb);
     return Py_None;
 }
 
@@ -190,7 +208,10 @@ static PyObject *method_add_soft_circle_to_eval_space(PyObject *self, PyObject *
     if(!PyArg_ParseTuple(args,"OO",&es_capsule,&sc_capsule)){return NULL;}
     sc_type *sc = get_ptr<sc_type>(sc_capsule);
     es_type *es = get_ptr<es_type>(es_capsule);
-    es->soft_circles.push_back(*sc);
+    #ifdef DEBUG_EVAL_TICK
+        printf("Storing %llu in %llu\n", (unsigned __int64)sc, (unsigned __int64)es);
+    #endif
+    es->soft_circles.push_back(sc);
 }
 
 static PyObject *method_remove_soft_circle_from_eval_space(PyObject *self, PyObject *args){
@@ -198,7 +219,15 @@ static PyObject *method_remove_soft_circle_from_eval_space(PyObject *self, PyObj
     if(!PyArg_ParseTuple(args,"OO",&es_capsule,&sc_capsule)){return NULL;}
     sc_type *sc = get_ptr<sc_type>(sc_capsule);
     es_type *es = get_ptr<es_type>(es_capsule);
-    es->soft_circles.remove(*sc);
+    std::vector<sc_type *>::iterator location = std::find(es->soft_circles.begin(),es->soft_circles.end(),sc);
+    if(location == es->soft_circles.end()){
+        PyErr_Format(
+            PyExc_IndexError,
+            "Soft circle was not in eval space to be removed."
+        );
+        return NULL;
+    }
+    es->soft_circles.erase(location);
 }
 
 static PyObject * method_tick_eval_space(PyObject *self, PyObject *args){
@@ -246,6 +275,8 @@ static PyMethodDef SoftCirclesMethods[] = {
     {"set_soft_circle_acceleration",method_set_soft_circle_acceleration, METH_VARARGS, ""},
     {"get_soft_circle_is_immovable",method_get_soft_circle_is_immovable, METH_VARARGS, ""},
     {"set_soft_circle_is_immovable",method_set_soft_circle_is_immovable, METH_VARARGS, ""},
+    {"get_soft_circle_out_of_scope_behavior",method_get_soft_circle_out_of_scope_behavior, METH_VARARGS, ""},
+    {"set_soft_circle_out_of_scope_behavior",method_set_soft_circle_out_of_scope_behavior, METH_VARARGS, ""},
     {"make_soft_circle_gravity",method_make_soft_circle_gravity, METH_VARARGS, ""},
     {"make_eval_space",method_make_eval_space, METH_VARARGS, ""},
     {"add_soft_circle_to_eval_space",method_add_soft_circle_to_eval_space, METH_VARARGS, ""},

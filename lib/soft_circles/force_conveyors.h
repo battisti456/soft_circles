@@ -27,7 +27,6 @@ class Soft_Circle_Gravity:public Force_Conveyor<T> {
 
     vec2<T> force(const Soft_Circle<T> & sc) const override {
         vec2<T> dist = g_sc->get_pos() - sc.get_pos();
-        printf("h\n");
         return (
             g*(sc.get_m())*(g_sc->get_m())
             /(pow(dist.length(),2)))

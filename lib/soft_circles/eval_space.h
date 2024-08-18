@@ -4,7 +4,8 @@
 #include "force_conveyors.h"
 #include "soft_circle.h"
 #include "vec2.h"//By: Chan Jer Shan, provided under the MIT License
-#include <list>
+#include <vector>
+
 
 template <class T>
 class Soft_Circle_Link{
@@ -31,14 +32,19 @@ class Eval_Space{
         T x_div_size;
         T y_div_size;
 
+        OutOfScopeBehavior oosb = UNDEFINED;
+
         Soft_Circle_Link<T>** divs = nullptr;
     public:
-        std::list<Soft_Circle<T>> soft_circles{};
-        std::list<const Force_Conveyor<T>*> forces{};
-        std::list<const Reaction_Force<T>*> reactions{};
+        std::vector<Soft_Circle<T>*> soft_circles;
+        std::vector<const Force_Conveyor<T>*> forces;
+        std::vector<const Reaction_Force<T>*> reactions;
 
         Eval_Space(T x_size, T y_size, unsigned int x_divs, unsigned int y_divs);
         ~Eval_Space();
+
+        OutOfScopeBehavior get_oosb() const {return oosb;}
+        void set_oosb(OutOfScopeBehavior new_oosb){oosb = new_oosb;}
 
         void make_divs();
         void add_to_div(int i, Soft_Circle<T> *sc) const;
@@ -46,8 +52,18 @@ class Eval_Space{
         void clear_div(int i) const;
 
         void evaluate_forces();
+        void actuate_out_of_scope_behavior();
         void tick_soft_circles(T t);
         void tick(T t);
+
+        bool out_of_scope(const Soft_Circle<T> * sc){
+            vec2<T> pos = sc->get_pos();
+            return pos.x < 0 || pos.y < 0 || pos.x > x || pos.y > y;
+        }
+
+        bool do_oosb(Soft_Circle<T> *sc, OutOfScopeBehavior oosb);
+
+        void oosb_keep_in(Soft_Circle<T> *sc);
 };
 
 template <class T>
@@ -78,18 +94,15 @@ void Eval_Space<T>::make_divs() {
     clear_divs();
     vec2<T> pos;
     int j,k;
-    for (Soft_Circle<T> & sc : soft_circles) {
+    for (Soft_Circle<T> * const& sc : soft_circles) {
         #ifdef DEBUG_EVAL_TICK
-            printf("Making div for %lu...\n",(unsigned long long int) &sc);
+            printf("Making div for %lu...\n",(unsigned long long int) sc);
         #endif
-        pos = sc.get_pos();
+        if(out_of_scope(sc)){continue;}
+        pos = sc->get_pos();
         j = (int) (pos.x/x_div_size);
         k = (int) (pos.y/y_div_size);
-        if(j < 0 || j >= num_div_x || k < 0 || k >= num_div_y){
-            //printf("Skipping %lu for being out of scope...\n", &sc);
-            continue;
-        }
-        add_to_div(j+k*num_div_x,&sc);
+        add_to_div(j+k*num_div_x,sc);
     }
 };
 
@@ -163,23 +176,33 @@ void Eval_Space<T>::evaluate_forces() {
             }
         }
     }
-    for(Soft_Circle<T> & sc: soft_circles) {
+    for(Soft_Circle<T> * sc: soft_circles) {
         for(const Force_Conveyor<T> * frc : forces){
-            sc.include(frc->force(sc));
+            sc->include(frc->force(*sc));
         }
         for(const Reaction_Force<T> * frc: reactions){
-            sc.include(frc->force(sc));
+            sc->include(frc->force(*sc));
         }
     }
 };
 
 template <class T>
+void Eval_Space<T>::actuate_out_of_scope_behavior(){
+    for(Soft_Circle<T> * sc : soft_circles){
+        if(!out_of_scope(sc)){continue;}
+        if(do_oosb(sc,sc->get_oosb())){continue;}//try to follow sc oosb
+        if(do_oosb(sc,oosb)){continue;}//try to follow own oosb
+        do_oosb(sc,IGNORE);//else, just ignore
+    }
+}
+
+template <class T>
 void Eval_Space<T>::tick_soft_circles(T t) {
-    for(Soft_Circle<T> & sc : soft_circles) {
+    for(Soft_Circle<T> * sc : soft_circles) {
         #ifdef DEBUG_EVAL_TICK
             printf("Ticking sc...\n");
         #endif
-        sc.tick(t);
+        sc->tick(t);
     }
 };
 
@@ -188,6 +211,24 @@ void Eval_Space<T>::tick(T t) {
     make_divs();
     evaluate_forces();
     tick_soft_circles(t);
+    actuate_out_of_scope_behavior();
 };
+
+template <class T>
+bool Eval_Space<T>::do_oosb(Soft_Circle<T> * sc, OutOfScopeBehavior oosb){
+    switch(sc->get_oosb()){
+        case KEEP_IN:
+            oosb_keep_in(sc);
+            break;
+        case IGNORE:
+            break;
+        case UNDEFINED:
+        default:
+            return false;
+    }
+    return true;
+}
+
+#include "eval_space_oosb.cpp"
 
 #endif

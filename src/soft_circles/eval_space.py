@@ -32,7 +32,7 @@ class Eval_Space():
     def tick(self,dt:float,num_ticks:int = 1,/):
         tick_eval_space(self._reference,dt,num_ticks)
     def __del__(self):
-        if hasattr(self,'___reference'):
+        if hasattr(self,'_reference'):
             delete_eval_space(self._reference)
     def add_force(self,*args:'Force_Conveyor'):
         for arg in args:

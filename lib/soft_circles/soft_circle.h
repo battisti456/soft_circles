@@ -3,6 +3,12 @@
 
 #include "vec2.h"//By: Chan Jer Shan, provided under the MIT License
 
+enum OutOfScopeBehavior {
+    KEEP_IN,
+    IGNORE,
+    UNDEFINED,
+};
+
 template <class T>
 class Soft_Circle {
     private:
@@ -21,6 +27,7 @@ class Soft_Circle {
         T b;//the b parameter in s(d) = t(1/(1+exp(-kd))^a*(1+b)-b
 
         bool immovable = false;
+        OutOfScopeBehavior oosb = UNDEFINED;
     public:
         Soft_Circle(T s_m, T s_r, T s_f, T s_t, T s_k, T s_a, T s_b);
 
@@ -47,6 +54,9 @@ class Soft_Circle {
         T get_k() const {return k;};
         T get_a() const {return a;};
         T get_b() const {return b;};
+
+        OutOfScopeBehavior get_oosb() const {return oosb;};
+        void set_oosb(OutOfScopeBehavior new_oosb){oosb = new_oosb;};
 
         bool is_immovable() const {return immovable;}
         void set_is_immovable(bool set_value) {immovable = set_value;}

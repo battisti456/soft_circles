@@ -2,7 +2,7 @@ from unittest import TestCase, main
 from random import random
 import pygame
 
-from soft_circles.soft_circle import Soft_Circle
+from soft_circles.soft_circle import Soft_Circle, OOSB
 from soft_circles.eval_space import Eval_Space
 from soft_circles.force_conveyor.soft_circle_gravity import Soft_Circle_Gravity
 
@@ -10,11 +10,11 @@ X_SIZE = 1000
 Y_SIZE = 1000
 X_DIVS = 100
 Y_DIVS = 100
-NUM = 100
+NUM = 1
 DT = 0.1
 SKIP_DISPLAY = 5
 TOTAL = 10000
-G = 1000000000000000000
+G = 1
 
 class Test(TestCase):
     def test_simple(self):
@@ -29,6 +29,7 @@ class Test(TestCase):
         for _ in range(NUM):
             sc = Soft_Circle(r=10)
             sc.position = (random()*X_SIZE,random()*Y_SIZE)
+            sc.out_of_scope_behavior = OOSB.KEEP_IN
             es.add(sc)
         pygame.init()
         surf = pygame.display.set_mode([X_SIZE,Y_SIZE])
@@ -36,7 +37,7 @@ class Test(TestCase):
             es.tick(DT,SKIP_DISPLAY)
             surf.fill("#000000")
             for sc in es.soft_circles():
-                pygame.draw.circle(surf,"#ffffff",sc.position,sc.r,width=1)
+                pygame.draw.circle(surf,"white" if sc.is_immovable else "yellow",sc.position,sc.r,width=1)
                 if not sc.velocity.is_zero():
                     pygame.draw.line(surf,"blue",sc.position,sc.position+sc.velocity,width=1)
                 if not sc.acceleration.is_zero():
