@@ -54,6 +54,7 @@ class Soft_Circle {
         T get_k() const {return k;};
         T get_a() const {return a;};
         T get_b() const {return b;};
+        vec2<T> get_net_force() const {return net_force;}
 
         OutOfScopeBehavior get_oosb() const {return oosb;};
         void set_oosb(OutOfScopeBehavior new_oosb){oosb = new_oosb;};

@@ -2,6 +2,7 @@ from typing import TYPE_CHECKING, Iterable
 
 from .soft_circles_module import (
     add_force_conveyor_to_eval_space,
+    add_reaction_to_eval_space,
     add_soft_circle_to_eval_space,
     delete_eval_space,
     get_address_from_capsule,
@@ -11,8 +12,8 @@ from .soft_circles_module import (
 )
 
 if TYPE_CHECKING:
+    from .force_conveyor import Force_Conveyor, Reaction
     from .soft_circle import Soft_Circle
-    from .force_conveyor import Force_Conveyor
     from .soft_circles_module import EvalSpaceReference
 
 class Eval_Space():
@@ -37,3 +38,7 @@ class Eval_Space():
     def add_force(self,*args:'Force_Conveyor'):
         for arg in args:
             add_force_conveyor_to_eval_space(self._reference,arg._reference)
+    def add_reaction(self,*args:'Reaction'):
+        for arg in args:
+            add_reaction_to_eval_space(self._reference,arg._reference)
+

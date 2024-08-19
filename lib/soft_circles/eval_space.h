@@ -5,6 +5,13 @@
 #include "soft_circle.h"
 #include "vec2.h"//By: Chan Jer Shan, provided under the MIT License
 #include <vector>
+#include <thread>
+
+#if defined DEBUG_EVAL_SPACE
+    #define D(x) x;
+#else
+    #define D(x)
+#endif
 
 
 template <class T>
@@ -32,9 +39,17 @@ class Eval_Space{
         T x_div_size;
         T y_div_size;
 
+        std::vector<std::thread> threads;
+
         OutOfScopeBehavior oosb = UNDEFINED;
 
         Soft_Circle_Link<T>** divs = nullptr;
+
+        unsigned int eval_num_threads_x, eval_num_threads_y, eval_row_threads_size, eval_col_threads_size;
+
+        void eval_main();
+        void eval_row(int row, std::thread * col_threads);
+        void eval_index(int row, int col);
     public:
         std::vector<Soft_Circle<T>*> soft_circles;
         std::vector<const Force_Conveyor<T>*> forces;
@@ -78,6 +93,11 @@ Eval_Space<T>::Eval_Space(T x_size, T y_size, unsigned int x_divs, unsigned int 
 
     divs = (Soft_Circle_Link<T>**) malloc(sizeof(Soft_Circle_Link<T>*)*num_divs);
     for(unsigned i = 0; i < num_divs; i++){divs[i] = nullptr;};
+
+    eval_num_threads_y = (int) ceil(num_div_y/3);
+    eval_num_threads_x = (int) ceil(num_div_x/3);
+    eval_row_threads_size = sizeof(std::thread) * eval_num_threads_y;
+    eval_col_threads_size = sizeof(std::thread) * eval_num_threads_x;
 };
 
 template <class T> 
@@ -88,16 +108,12 @@ Eval_Space<T>::~Eval_Space() {
 
 template <class T>
 void Eval_Space<T>::make_divs() {
-    #ifdef DEBUG_EVAL_TICK
-        printf("Making divs...\n");
-    #endif
+    D(printf("Making divs...\n"))
     clear_divs();
     vec2<T> pos;
     int j,k;
     for (Soft_Circle<T> * const& sc : soft_circles) {
-        #ifdef DEBUG_EVAL_TICK
-            printf("Making div for %lu...\n",(unsigned long long int) sc);
-        #endif
+        //D(printf("Making div for %lu...\n",(unsigned long long int) sc))
         if(out_of_scope(sc)){continue;}
         pos = sc->get_pos();
         j = (int) (pos.x/x_div_size);
@@ -108,17 +124,13 @@ void Eval_Space<T>::make_divs() {
 
 template <class T>
 void Eval_Space<T>::add_to_div(int i, Soft_Circle<T>* sc) const {
-    #ifdef DEBUG_EVAL_TICK
-        printf("Adding %lu to div %d...\n",(unsigned long long int) sc,i);
-    #endif
+    //D(printf("Adding %lu to div %d...\n",(unsigned long long int) sc,i))
     divs[i] = new Soft_Circle_Link<T>(sc,divs[i]);
 };
 
 template<class T>
 void Eval_Space<T>::clear_divs() const {
-    #ifdef DEBUG_EVAL_TICK
-        printf("Clearing divs...\n");
-    #endif
+    //D(printf("Clearing divs...\n"))
     for (int i = 0; i < num_divs; i++){
         clear_div(i);
     }
@@ -127,81 +139,16 @@ void Eval_Space<T>::clear_divs() const {
 template <class T>
 void Eval_Space<T>::clear_div(int i) const {
     if(divs[i] != nullptr){
-        #ifdef DEBUG_EVAL_TICK
-            printf("Clearing div %d; %lu != %lu...\n",i,(unsigned long int) divs[i], (unsigned long int) nullptr);
-        #endif
+        D(printf("Clearing div %d; %lu != %lu...\n",i,(unsigned long int) divs[i], (unsigned long int) nullptr))
         delete divs[i];
         divs[i] = nullptr;
     }
 };
 
 template <class T>
-void Eval_Space<T>::evaluate_forces() {
-    #ifdef DEBUG_EVAL_TICK
-        printf("Evaluating forces...\n");
-    #endif
-    Soft_Circle<T> *sc, *o_sc;
-    Soft_Circle_Link<T> *scl, *o_scl;
-    for(unsigned int j = 0; j < num_div_x; j++) {
-        for(unsigned int k = 0; k < num_div_y; k++) {
-            #ifdef DEBUG_EVAL_TICK
-                printf("Analyzing block (%d,%d) -> div %d\n",j,k,j+k*num_div_x);
-            #endif
-            scl = divs[j+k*num_div_x];
-            while(scl != nullptr){
-                sc = scl->get_soft_circle();
-                for(unsigned int o_j = j-1; o_j<=j+1;o_j++){
-                    if(o_j < 0 || o_j >= num_div_x){continue;};
-                    for(unsigned int o_k = k -1; o_k <= k+1;o_k++){
-                        if(o_k < 0 || o_k >= num_div_y){continue;};
-                        #ifdef DEBUG_EVAL_TICK
-                            printf("Looking at neighbor (%d,%d) -> div %d\n",o_j,o_k,o_j+o_k*num_div_x);
-                        #endif
-                        o_scl=divs[o_j+o_k*num_div_x];
-                        while(o_scl != nullptr){
-                            o_sc = o_scl->get_soft_circle();
-                            
-                            if(o_sc != sc) {sc->include(o_sc);};
-                            #ifdef DEBUG_EVAL_TICK
-                                printf("Other from %lu -> %lu\n",o_scl,o_scl->get_next());
-                            #endif
-                            o_scl = o_scl->get_next();
-                        }
-                    }
-                }
-                #ifdef DEBUG_EVAL_TICK
-                    printf("Main from %lu -> %lu\n",scl,scl->get_next());
-                #endif
-                scl = scl->get_next();
-            }
-        }
-    }
-    for(Soft_Circle<T> * sc: soft_circles) {
-        for(const Force_Conveyor<T> * frc : forces){
-            sc->include(frc->force(*sc));
-        }
-        for(const Reaction_Force<T> * frc: reactions){
-            sc->include(frc->force(*sc));
-        }
-    }
-};
-
-template <class T>
-void Eval_Space<T>::actuate_out_of_scope_behavior(){
-    for(Soft_Circle<T> * sc : soft_circles){
-        if(!out_of_scope(sc)){continue;}
-        if(do_oosb(sc,sc->get_oosb())){continue;}//try to follow sc oosb
-        if(do_oosb(sc,oosb)){continue;}//try to follow own oosb
-        do_oosb(sc,IGNORE);//else, just ignore
-    }
-}
-
-template <class T>
 void Eval_Space<T>::tick_soft_circles(T t) {
     for(Soft_Circle<T> * sc : soft_circles) {
-        #ifdef DEBUG_EVAL_TICK
-            printf("Ticking sc...\n");
-        #endif
+        //D(printf("Ticking sc...\n"))
         sc->tick(t);
     }
 };
@@ -215,20 +162,24 @@ void Eval_Space<T>::tick(T t) {
 };
 
 template <class T>
-bool Eval_Space<T>::do_oosb(Soft_Circle<T> * sc, OutOfScopeBehavior oosb){
-    switch(sc->get_oosb()){
-        case KEEP_IN:
-            oosb_keep_in(sc);
-            break;
-        case IGNORE:
-            break;
-        case UNDEFINED:
-        default:
-            return false;
+void Eval_Space<T>::evaluate_forces() {
+    D(printf("Evaluating forces...\n"))
+    eval_main();
+};
+
+template <class T>
+void Eval_Space<T>::actuate_out_of_scope_behavior(){
+    for(Soft_Circle<T> * sc : soft_circles){
+        if(!out_of_scope(sc)){continue;}
+        if(do_oosb(sc,sc->get_oosb())){continue;}//try to follow sc oosb
+        if(do_oosb(sc,oosb)){continue;}//try to follow own oosb
+        do_oosb(sc,IGNORE);//else, just ignore
     }
-    return true;
 }
 
-#include "eval_space_oosb.cpp"
+#undef D
+
+#include "eval_space/evaluate_forces.h"
+#include "eval_space/oosb.h"
 
 #endif
