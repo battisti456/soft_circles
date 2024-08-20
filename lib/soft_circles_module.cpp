@@ -1,4 +1,7 @@
-#define DEBUG_EVAL_SPACE
+//#define DEBUG_EVAL_SPACE
+//#define DEBUG_EVAL_TICK
+//#define DEBUG_SOFT_CIRCLE
+//#define DEBUG_EVAL_SPACE_EVALUATE_FORCES
 
 #include "soft_circle_module.h"
 

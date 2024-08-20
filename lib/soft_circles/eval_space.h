@@ -39,17 +39,19 @@ class Eval_Space{
         T x_div_size;
         T y_div_size;
 
-        std::vector<std::thread> threads;
+        unsigned int interaction_map_dim;
+        bool * interaction_map = nullptr;
+
+        bool get_interacted(Soft_Circle<T>* sc1, Soft_Circle<T>* sc2);
+        void set_interacted(Soft_Circle<T> *sc1, Soft_Circle<T>* sc2, bool _set);
+        void set_interacted(Soft_Circle<T> *sc1, Soft_Circle<T>* sc2) {set_interacted(sc1,sc2,true);}
+        void clear_interactions();
 
         OutOfScopeBehavior oosb = UNDEFINED;
 
         Soft_Circle_Link<T>** divs = nullptr;
 
-        unsigned int eval_num_threads_x, eval_num_threads_y, eval_row_threads_size, eval_col_threads_size;
-
         void eval_main();
-        void eval_row(int row, std::thread * col_threads);
-        void eval_index(int row, int col);
     public:
         std::vector<Soft_Circle<T>*> soft_circles;
         std::vector<const Force_Conveyor<T>*> forces;
@@ -70,6 +72,8 @@ class Eval_Space{
         void actuate_out_of_scope_behavior();
         void tick_soft_circles(T t);
         void tick(T t);
+
+        void set_es_ids();
 
         bool out_of_scope(const Soft_Circle<T> * sc){
             vec2<T> pos = sc->get_pos();
@@ -93,17 +97,13 @@ Eval_Space<T>::Eval_Space(T x_size, T y_size, unsigned int x_divs, unsigned int 
 
     divs = (Soft_Circle_Link<T>**) malloc(sizeof(Soft_Circle_Link<T>*)*num_divs);
     for(unsigned i = 0; i < num_divs; i++){divs[i] = nullptr;};
-
-    eval_num_threads_y = (int) ceil(num_div_y/3);
-    eval_num_threads_x = (int) ceil(num_div_x/3);
-    eval_row_threads_size = sizeof(std::thread) * eval_num_threads_y;
-    eval_col_threads_size = sizeof(std::thread) * eval_num_threads_x;
 };
 
 template <class T> 
 Eval_Space<T>::~Eval_Space() {
     clear_divs();
     free(divs);
+    free(interaction_map);
 };
 
 template <class T>
@@ -131,7 +131,7 @@ void Eval_Space<T>::add_to_div(int i, Soft_Circle<T>* sc) const {
 template<class T>
 void Eval_Space<T>::clear_divs() const {
     //D(printf("Clearing divs...\n"))
-    for (int i = 0; i < num_divs; i++){
+    for (unsigned int i = 0; i < num_divs; i++){
         clear_div(i);
     }
 };
@@ -154,14 +154,6 @@ void Eval_Space<T>::tick_soft_circles(T t) {
 };
 
 template <class T>
-void Eval_Space<T>::tick(T t) {
-    make_divs();
-    evaluate_forces();
-    tick_soft_circles(t);
-    actuate_out_of_scope_behavior();
-};
-
-template <class T>
 void Eval_Space<T>::evaluate_forces() {
     D(printf("Evaluating forces...\n"))
     eval_main();
@@ -181,5 +173,7 @@ void Eval_Space<T>::actuate_out_of_scope_behavior(){
 
 #include "eval_space/evaluate_forces.h"
 #include "eval_space/oosb.h"
+#include "eval_space/interactions.h"
+#include "eval_space/tick.h"
 
 #endif

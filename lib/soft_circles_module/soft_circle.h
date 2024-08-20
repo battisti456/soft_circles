@@ -1,6 +1,12 @@
 #include "./soft_circle_module.h"
 
 
+#if defined DEBUG_SOFT_CIRCLE
+    #define D(x) x;
+#else
+    #define D(x)
+#endif
+
 static PyObject *method_make_soft_circle(PyObject *self, PyObject *args){
     num_type m,r,f,t,k,a,b;
     if (!PyArg_ParseTuple(args,"ddddddd",&m,&r,&f,&t,&k,&a,&b)){
@@ -10,9 +16,7 @@ static PyObject *method_make_soft_circle(PyObject *self, PyObject *args){
         return NULL;
     }
     sc_type *sc = new sc_type(m,r,f,t,k,a,b);
-    #ifdef DEBUG_EVAL_TICK
-        printf("Created SC %llu\n", (unsigned __int64) sc);
-    #endif
+    D(printf("Created sc%llu\n", sc))
     return store_ptr<sc_type>(sc);
 }
 
@@ -56,6 +60,7 @@ static PyObject *method_set_soft_circle_position(PyObject *self, PyObject *args)
     if(!PyArg_ParseTuple(args,"OO",&capsule,&tuple)){return NULL;};
     sc_type *sc = get_ptr<sc_type>(capsule);
     sc->set_pos(Vec2_From_PyTuple<num_type>(tuple));
+    return Py_None;
 }
 
 static PyObject *method_get_soft_circle_velocity(PyObject *self, PyObject *args){
@@ -69,6 +74,7 @@ static PyObject *method_set_soft_circle_velocity(PyObject *self, PyObject *args)
     if(!PyArg_ParseTuple(args,"OO",&capsule,&tuple)){return NULL;};
     sc_type *sc = get_ptr<sc_type>(capsule);
     sc->set_vel(Vec2_From_PyTuple<num_type>(tuple));
+    return Py_None;
 }
 
 static PyObject *method_get_soft_circle_acceleration(PyObject *self, PyObject *args){
@@ -82,6 +88,7 @@ static PyObject *method_set_soft_circle_acceleration(PyObject *self, PyObject *a
     if(!PyArg_ParseTuple(args,"OO",&capsule,&tuple)){return NULL;};
     sc_type *sc = get_ptr<sc_type>(capsule);
     sc->set_acc(Vec2_From_PyTuple<num_type>(tuple));
+    return Py_None;
 }
 
 static PyObject *method_get_soft_circle_m(PyObject *self, PyObject *args){
@@ -125,3 +132,5 @@ static PyObject *method_get_soft_circle_b(PyObject *self, PyObject *args){
     if(!PyArg_ParseTuple(args,"O",&capsule)){return NULL;};
     return PyFloat_FromDouble((double) (get_ptr<sc_type>(capsule))->get_b());
 }
+
+#undef D

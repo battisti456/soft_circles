@@ -41,7 +41,7 @@ static PyObject *method_delete(PyObject *self, PyObject *args){
     delete item;
 }
 
-static PyObject *PyTuple_From_Vec2(vec2<num_type> &vec){
+static PyObject *PyTuple_From_Vec2(vec2<num_type> vec){
     PyObject* to_return = PyTuple_New(2);
     PyTuple_SetItem(to_return,0,PyFloat_FromDouble(vec.x));
     PyTuple_SetItem(to_return,1,PyFloat_FromDouble(vec.y));

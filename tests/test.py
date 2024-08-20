@@ -13,9 +13,9 @@ Y_SIZE = 1000
 X_DIVS = 100
 Y_DIVS = 100
 NUM = 10
-DT = 0.00001
-SKIP_DISPLAY = 50000
-TOTAL = 2000000000
+DT = 0.001
+SKIP_DISPLAY = 500
+TOTAL = 20000000
 G = 4
 D = 1
 
@@ -24,7 +24,7 @@ class Test(TestCase):
         seed(1000)
         es = Eval_Space(x_divs=X_DIVS,y_divs=Y_DIVS,x_size=X_SIZE,y_size=Y_SIZE)
 
-        gs = Soft_Circle(m=1,r=50,k=100,a=6.5,b=0,t=10)
+        gs = Soft_Circle(r=50,t=100000)
         es.add(gs)
         gsf = Point_Force((X_SIZE/2,Y_SIZE/2),G)
         d = Simple_Drag(D)
@@ -49,6 +49,8 @@ class Test(TestCase):
                 if not sc.acceleration.is_zero():
                     pygame.draw.line(surf,"red",sc.position,sc.position+sc.acceleration,width=1)
             pygame.display.flip()
+            pygame.event.pump()
+        pygame.quit()
             
 
 

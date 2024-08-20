@@ -26,6 +26,8 @@ class Soft_Circle {
         T a;//the a parameter in s(d) = t(1/(1+exp(-kd))^a*(1+b)-b
         T b;//the b parameter in s(d) = t(1/(1+exp(-kd))^a*(1+b)-b
 
+        unsigned int es_id;
+
         bool immovable = false;
         OutOfScopeBehavior oosb = UNDEFINED;
     public:
@@ -37,6 +39,7 @@ class Soft_Circle {
         vec2<T> repelling_force(Soft_Circle<T>* other) const;
         vec2<T> friction_force(Soft_Circle<T>* other) const;
 
+        void set_es_id(unsigned int _es_id){es_id = _es_id;}
         void set_pos(T x, T y) {pos.set(x,y);};
         void set_pos(vec2<T> new_pos) {pos.set(new_pos.x,new_pos.y);};
         void set_vel(T x, T y) {vel.set(x,y);};
@@ -44,6 +47,7 @@ class Soft_Circle {
         void set_acc(T x, T y) {acc.set(x,y);};
         void set_acc(vec2<T> new_acc) {acc.set(new_acc.x,new_acc.y);};
         
+        unsigned int get_es_id() const {return es_id;}
         vec2<T> get_pos() const {return pos;};
         vec2<T> get_vel() const {return vel;};
         vec2<T> get_acc() const {return acc;};
@@ -101,8 +105,8 @@ void Soft_Circle<T>::tick(T dt) {
 template <class T>
 vec2<T> Soft_Circle<T>::repelling_force(Soft_Circle<T>* other) const {
     vec2<T> diff = (pos - other->get_pos());
-    T d = diff.length();
-    if(d > r + other->r) {return vec2<T>();};
+    T d = r + other->get_r() - diff.length();
+    if(d <= 0) {return vec2<T>();};
     T total_k = (k+other->get_k());
     T total_a = (a+other->get_a());
     T total_b = (b+other->get_b());
