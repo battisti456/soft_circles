@@ -53,12 +53,13 @@ class Eval_Space{
 
         void eval_main();
     public:
-        std::vector<Soft_Circle<T>*> soft_circles;
+        std::vector<Soft_Circle<T>> _soft_circles;
         std::vector<const Force_Conveyor<T>*> forces;
         std::vector<const Reaction_Force<T>*> reactions;
 
         Eval_Space(T x_size, T y_size, unsigned int x_divs, unsigned int y_divs);
         ~Eval_Space();
+
 
         OutOfScopeBehavior get_oosb() const {return oosb;}
         void set_oosb(OutOfScopeBehavior new_oosb){oosb = new_oosb;}
@@ -112,13 +113,13 @@ void Eval_Space<T>::make_divs() {
     clear_divs();
     vec2<T> pos;
     int j,k;
-    for (Soft_Circle<T> * const& sc : soft_circles) {
+    for (Soft_Circle<T> &sc : _soft_circles) {
         //D(printf("Making div for %lu...\n",(unsigned long long int) sc))
-        if(out_of_scope(sc)){continue;}
-        pos = sc->get_pos();
+        if(out_of_scope(&sc)){continue;}
+        pos = sc.get_pos();
         j = (int) (pos.x/x_div_size);
         k = (int) (pos.y/y_div_size);
-        add_to_div(j+k*num_div_x,sc);
+        add_to_div(j+k*num_div_x,&sc);
     }
 };
 
@@ -147,9 +148,9 @@ void Eval_Space<T>::clear_div(int i) const {
 
 template <class T>
 void Eval_Space<T>::tick_soft_circles(T t) {
-    for(Soft_Circle<T> * sc : soft_circles) {
+    for(Soft_Circle<T> &sc : _soft_circles) {
         //D(printf("Ticking sc...\n"))
-        sc->tick(t);
+        sc.tick(t);
     }
 };
 
@@ -161,11 +162,11 @@ void Eval_Space<T>::evaluate_forces() {
 
 template <class T>
 void Eval_Space<T>::actuate_out_of_scope_behavior(){
-    for(Soft_Circle<T> * sc : soft_circles){
-        if(!out_of_scope(sc)){continue;}
-        if(do_oosb(sc,sc->get_oosb())){continue;}//try to follow sc oosb
-        if(do_oosb(sc,oosb)){continue;}//try to follow own oosb
-        do_oosb(sc,IGNORE);//else, just ignore
+    for(Soft_Circle<T> &sc : _soft_circles){
+        if(!out_of_scope(&sc)){continue;}
+        if(do_oosb(&sc,sc.get_oosb())){continue;}//try to follow sc oosb
+        if(do_oosb(&sc,oosb)){continue;}//try to follow own oosb
+        do_oosb(&sc,IGNORE);//else, just ignore
     }
 }
 

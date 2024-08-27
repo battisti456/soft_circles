@@ -19,19 +19,19 @@ Py_ssize_t SoftCircleReferenceSize = sizeof(sc_type*);
 template <class T>
 T* get_ptr(PyObject *capsule){
     return (T*) PyCapsule_GetPointer(capsule,NULL);
-}
+};
 
 template <class T>
 T* get_ptr_from_args(PyObject *arg){
     PyObject* capsule;
     if(!PyArg_ParseTuple(arg,"O",&capsule)){return NULL;};
     return get_ptr<T>(capsule);
-}
+};
 
 template <class T>
 static PyObject *store_ptr(T* ptr){
     return PyCapsule_New(ptr,NULL,NULL);
-}
+};
 
 template <class T>
 static PyObject *method_delete(PyObject *self, PyObject *args){
@@ -39,14 +39,14 @@ static PyObject *method_delete(PyObject *self, PyObject *args){
     if(!PyArg_ParseTuple(args,"O",&capsule)){return NULL;}
     T *item = get_ptr<T>(capsule);
     delete item;
-}
+};
 
 static PyObject *PyTuple_From_Vec2(vec2<num_type> vec){
     PyObject* to_return = PyTuple_New(2);
     PyTuple_SetItem(to_return,0,PyFloat_FromDouble(vec.x));
     PyTuple_SetItem(to_return,1,PyFloat_FromDouble(vec.y));
     return to_return;
-}
+};
 
 template <class T>
 vec2<T> Vec2_From_PyTuple(PyObject* tuple){
@@ -58,16 +58,16 @@ vec2<T> Vec2_From_PyTuple(PyObject* tuple){
             PyTuple_GetItem(tuple,1)
         )
     );
-}
+};
 
 static PyObject *method_get_address_from_capsule(PyObject *self, PyObject *args) {
     PyObject *capsule;
     if(!PyArg_ParseTuple(args,"O",&capsule)){return NULL;};
     return PyLong_FromSize_t((size_t) get_ptr<void>(capsule));
-}
+};
 
-#include "soft_circles_module/eval_space.h"
-#include "soft_circles_module/forces.h"
-#include "soft_circles_module/soft_circle.h"
+#include "soft_circles_module/objects/soft_circle.h"
+#include "soft_circles_module/objects/eval_space.h"
+#include "soft_circles_module/objects/exceptions.h"
 
 #endif

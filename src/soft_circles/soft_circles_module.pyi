@@ -1,102 +1,20 @@
-from typing import NewType
+class Soft_Circle:
+    m:float
+    r:float
+    f:float
+    t:float
+    k:float
+    a:float
+    b:float
+    position:tuple[float,float]
+    velocity:tuple[float,float]
+    acceleration:tuple[float,float]
+    @property
+    def eval_space(self) -> 'Eval_Space':
+        ...
 
-Reference = NewType("Reference", object)
-
-SoftCircleReference = NewType('SoftCircleReference', Reference)
-EvalSpaceReference = NewType('EvalSpaceReference', Reference)
-ForceConveyorReference = NewType('ForceConveyorReference', Reference)
-ReactionReference = NewType("ReactionReference",ForceConveyorReference)
-
-
-def make_soft_circle(m:float,r:float,f:float,t:float,k:float,a:float,b:float,/) -> SoftCircleReference:
-    ...
-
-def get_soft_circle_position(scr:SoftCircleReference,/) -> tuple[float,float]:
-    ...
-
-def set_soft_circle_position(scr:SoftCircleReference,position:tuple[float,float],/) -> None:
-    ...
-
-def get_soft_circle_velocity(scr:SoftCircleReference,/) -> tuple[float,float]:
-    ...
-
-def set_soft_circle_velocity(scr:SoftCircleReference,velocity:tuple[float,float],/) -> None:
-    ...
-
-def get_soft_circle_acceleration(scr:SoftCircleReference,/) -> tuple[float,float]:
-    ...
-
-def set_soft_circle_acceleration(scr:SoftCircleReference,acceleration:tuple[float,float],/) -> None:
-    ...
-
-def get_soft_circle_m(scr:SoftCircleReference,/) -> float:
-    ...
-
-def get_soft_circle_r(scr:SoftCircleReference,/) -> float:
-    ...
-
-def get_soft_circle_f(scr:SoftCircleReference,/) -> float:
-    ...
-
-def get_soft_circle_t(scr:SoftCircleReference,/) -> float:
-    ...
-
-def get_soft_circle_k(scr:SoftCircleReference,/) -> float:
-    ...
-
-def get_soft_circle_a(scr:SoftCircleReference,/) -> float:
-    ...
-
-def get_soft_circle_b(scr:SoftCircleReference,/) -> float:
-    ...
-
-def get_soft_circle_is_immovable(scr:SoftCircleReference,/) -> bool:
-    ...
-
-def set_soft_circle_is_immovable(scr:SoftCircleReference,value:bool,/) -> None:
-    ...
-
-def get_soft_circle_out_of_scope_behavior(scr:SoftCircleReference,/) -> int:
-    ...
-
-def set_soft_circle_out_of_scope_behavior(scr:SoftCircleReference,val:int,/) -> None:
-    ...
-
-def make_soft_circle_gravity(scr:SoftCircleReference,g:float,/) -> ForceConveyorReference:
-    ...
-
-def make_point_force(x:float,y:float,f:float,/) -> ForceConveyorReference:
-    ...
-
-def make_simple_drag(c:float,/) -> ForceConveyorReference:
-    ...
-
-def make_simple_stillness(vel_on:float,force_off:float,/) -> ReactionReference:
-    ...
-
-def make_eval_space(x_size:float,y_size:float,x_divs:int,y_divs:int,/) -> EvalSpaceReference:
-    ...
-
-def add_soft_circle_to_eval_space(eval_space:EvalSpaceReference,soft_circle:SoftCircleReference,/) -> None:
-    ...
-
-def remove_soft_circle_from_eval_space(eval_space:EvalSpaceReference,soft_circle:SoftCircleReference,/) -> None:
-    ...
-
-def tick_eval_space(es:EvalSpaceReference,dt:float,num_ticks:int,/) -> None:
-    ...
-
-def add_force_conveyor_to_eval_space(esr:EvalSpaceReference,fcr:ForceConveyorReference,/) -> None:
-    ...
-
-def add_reaction_to_eval_space(esr:EvalSpaceReference,fcr:ReactionReference,/) -> None:
-    ...
-
-def delete_soft_circle(sc:SoftCircleReference,/) -> None:
-    ...
-
-def delete_eval_space(es:EvalSpaceReference,/) -> None:
-    ...
-
-def get_address_from_capsule(ref:Reference,/) -> int:
-    ...
+class Eval_Space:
+    def bind(self,*args:Soft_Circle) -> None:
+        ...
+    def unbind(self,soft_circle:Soft_Circle,/) -> None:
+        ...

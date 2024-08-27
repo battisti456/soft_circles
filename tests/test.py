@@ -6,7 +6,6 @@ from soft_circles.soft_circle import Soft_Circle, OOSB
 from soft_circles.eval_space import Eval_Space
 from soft_circles.force_conveyor.point_force import Point_Force
 from soft_circles.force_conveyor.simple_drag import Simple_Drag
-from soft_circles.force_conveyor.simple_stillness import Simple_Stillness
 
 X_SIZE = 1000
 Y_SIZE = 1000
@@ -24,8 +23,11 @@ class Test(TestCase):
         seed(1000)
         es = Eval_Space(x_divs=X_DIVS,y_divs=Y_DIVS,x_size=X_SIZE,y_size=Y_SIZE)
 
-        gs = Soft_Circle(r=50,t=100000)
-        es.add(gs)
+        gs = Soft_Circle()
+        gs.r = 50
+        gs.t = 100000
+
+        es.bind(gs)
         gsf = Point_Force((X_SIZE/2,Y_SIZE/2),G)
         d = Simple_Drag(D)
         es.add_force(gsf)
@@ -33,10 +35,11 @@ class Test(TestCase):
         gs.is_immovable = True
         gs.position = (X_SIZE/2,Y_SIZE/2)
         for _ in range(NUM):
-            sc = Soft_Circle(r=10)
+            sc = Soft_Circle()
+            sc.r = 10
             sc.position = (random()*X_SIZE,random()*Y_SIZE)
             sc.out_of_scope_behavior = OOSB.KEEP_IN
-            es.add(sc)
+            es.bind(sc)
         pygame.init()
         surf = pygame.display.set_mode([X_SIZE,Y_SIZE])
         for _ in range(int(TOTAL/SKIP_DISPLAY)):

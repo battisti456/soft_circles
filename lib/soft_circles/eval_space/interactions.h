@@ -2,13 +2,13 @@
 
 template <class T>
 void Eval_Space<T>::set_es_ids() {
-    interaction_map_dim = soft_circles.size();
+    unsigned int interaction_map_dim = _soft_circles.size();
     free(interaction_map);
     interaction_map = (bool*) malloc(sizeof(bool)*interaction_map_dim*interaction_map_dim);
     clear_interactions();
     unsigned int id = 0;
-    for(Soft_Circle<T> * sc : soft_circles){
-        sc->set_es_id(id++);
+    for(Soft_Circle<T> &sc : _soft_circles){
+        sc.set_es_id(id++);
     }
 };
 

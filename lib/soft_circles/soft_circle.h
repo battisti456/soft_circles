@@ -18,22 +18,23 @@ class Soft_Circle {
 
         vec2<T> net_force = vec2<T>();
 
-        T m;//the mass (or resistance to force) of a circle a = F/m
-        T r;//the radius of influence of the circle
-        T f;//the f parameter in F(v) = vf
-        T t;//the t parameter in s(d) = t(1/(1+exp(-kd))^a*(1+b)-b
-        T k;//the k parameter in s(d) = t(1/(1+exp(-kd))^a*(1+b)-b
-        T a;//the a parameter in s(d) = t(1/(1+exp(-kd))^a*(1+b)-b
-        T b;//the b parameter in s(d) = t(1/(1+exp(-kd))^a*(1+b)-b
+        T m = 1;//the mass (or resistance to force) of a circle a = F/m
+        T r = 1;//the radius of influence of the circle
+        T f = 0;//the f parameter in F(v) = vf
+        T t = 0;//the t parameter in s(d) = t(1/(1+exp(-kd))^a*(1+b)-b
+        T k = 0;//the k parameter in s(d) = t(1/(1+exp(-kd))^a*(1+b)-b
+        T a = 0;//the a parameter in s(d) = t(1/(1+exp(-kd))^a*(1+b)-b
+        T b = 0;//the b parameter in s(d) = t(1/(1+exp(-kd))^a*(1+b)-b
 
         unsigned int es_id;
 
         bool immovable = false;
         OutOfScopeBehavior oosb = UNDEFINED;
     public:
+        Soft_Circle(){}
         Soft_Circle(T s_m, T s_r, T s_f, T s_t, T s_k, T s_a, T s_b);
 
-        void include(vec2<T> &force);
+        void include(vec2<T> force);
         void include(Soft_Circle<T>* other);
         void tick(T dt);
         vec2<T> repelling_force(Soft_Circle<T>* other) const;
@@ -58,6 +59,14 @@ class Soft_Circle {
         T get_k() const {return k;};
         T get_a() const {return a;};
         T get_b() const {return b;};
+        void set_m(T val){m = val;}
+        void set_r(T val){r = val;}
+        void set_f(T val){f = val;}
+        void set_t(T val){t = val;}
+        void set_k(T val){k = val;}
+        void set_a(T val){a = val;}
+        void set_b(T val){b = val;}
+
         vec2<T> get_net_force() const {return net_force;}
 
         OutOfScopeBehavior get_oosb() const {return oosb;};
@@ -81,7 +90,7 @@ Soft_Circle<T>::Soft_Circle(T s_m, T s_r, T s_f, T s_t, T s_k, T s_a, T s_b) {
 };
 
 template <class T>
-void Soft_Circle<T>::include(vec2<T> &force) {
+void Soft_Circle<T>::include(vec2<T> force) {
     net_force += force;
 }
 

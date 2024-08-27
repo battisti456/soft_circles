@@ -26,8 +26,9 @@ SOFTWARE.
 #ifndef __VEC2_H__
 #define __VEC2_H__
 
-#include <cmath>
+#define _USE_MATH_DEFINES
 
+#include <cmath>
 
 template <class T>
 class vec2 {

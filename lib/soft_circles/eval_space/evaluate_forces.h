@@ -41,12 +41,12 @@ void Eval_Space<T>::eval_main() {
             }
         }
     }
-    for(Soft_Circle<T> * sc: soft_circles) {
+    for(Soft_Circle<T> &sc: _soft_circles) {
         for(const Force_Conveyor<T> * frc : forces){
-            sc->include(frc->force(sc));
+            sc.include(frc->force(&sc));
         }
         for(const Reaction_Force<T> * frc: reactions){
-            sc->include(frc->force(sc));
+            sc.include(frc->force(&sc));
         }
     }
 };
