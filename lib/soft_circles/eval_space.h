@@ -114,6 +114,7 @@ void Eval_Space<T>::make_divs() {
     for (Soft_Circle<T> &sc : _soft_circles) {
         //D(printf("Making div for %lu...\n",(unsigned long long int) sc))
         if(out_of_scope(&sc)){continue;}
+        if(!sc.is_tangible()){continue;}
         pos = sc.get_pos();
         j = (int) (pos.x/x_div_size);
         k = (int) (pos.y/y_div_size);

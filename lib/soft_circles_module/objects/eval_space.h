@@ -5,6 +5,7 @@
 #include "soft_circle_module.h"
 #include "_es_bindable.h"
 #include "soft_circle.h"
+#include "force_conveyor.h"
 #include "exceptions.h"
 
 typedef struct EvalSpaceObject : _Binder{
@@ -52,6 +53,17 @@ static PyObject* EvalSpace_unbind(EvalSpaceObject* self, PyObject* args){
     return PyObject_CallMethod(_bo,"_on_unbound","O",self);
 }
 
+static PyObject* EvalSpace_tick(EvalSpaceObject* self, PyObject* args){
+    double dt;
+    std::size_t num;
+    if(!PyArg_ParseTuple(args,"dK",&dt,&num)){return NULL;}
+    for(std::size_t i = 0; i < num; i++){
+        self->es.tick(dt);
+        if(PyErr_Occurred()){return NULL;}
+    }
+    return Py_None;
+}
+
 template <PyObject* type>
 static PyObject* EvalSpace_get_bound(EvalSpaceObject* self, void* closure){
     PyObject* to_return = PyTuple_New(self->bound.size());
@@ -64,15 +76,31 @@ static PyObject* EvalSpace_get_bound(EvalSpaceObject* self, void* closure){
     return to_return;
 }
 
+static PyObject* EvalSpace_get_oosb(EvalSpaceObject* self, void* closure){
+    return PyLong_FromSize_t((std::size_t) self->es.get_oosb());
+}
+
+static int EvalSpace_set_oosb(EvalSpaceObject* self, PyObject* val, void* closure){
+    if(!PyLong_Check(val)){
+        PyErr_SetString(PyExc_TypeError, "Value must be a boolean.");
+        return -1;
+    }
+    self->es.set_oosb((OutOfScopeBehavior) PyLong_AsSize_t(val));
+    return 0;
+}
+
 static PyMethodDef EvalSpace_methods[] = {
     {"bind", (PyCFunction) EvalSpace_bind, METH_VARARGS, ""},
     {"unbind", (PyCFunction) EvalSpace_unbind, METH_VARARGS, ""},
+    {"tick", (PyCFunction) EvalSpace_tick, METH_VARARGS, ""},
     {NULL},
 };
 
 static PyGetSetDef EvalSpace_getsetters[] = {
     {"bound", (getter) EvalSpace_get_bound<(PyObject*) &_EsBindableType>,NULL,"",NULL},
     {"soft_circles", (getter) EvalSpace_get_bound<(PyObject*) &SoftCircleType>, NULL, "", NULL},
+    {"force_conveyors", (getter) EvalSpace_get_bound<(PyObject*) &ForceConveyorType>, NULL, "", NULL},
+    {"oosb", (getter) EvalSpace_get_oosb, (setter) EvalSpace_set_oosb, "", NULL},
     {NULL}
 };
 

@@ -7,6 +7,9 @@ enum OutOfScopeBehavior {
     KEEP_IN,
     IGNORE,
     UNDEFINED,
+    SET_IMMOVABLE,
+    SET_INTANGIBLE,
+    SET_IMMOVABLE_AND_INTANGIBLE,
 };
 
 template <class T>
@@ -29,6 +32,7 @@ class Soft_Circle {
         unsigned int es_id;
 
         bool immovable = false;
+        bool tangible = true;
         OutOfScopeBehavior oosb = UNDEFINED;
     public:
         Soft_Circle(){}
@@ -72,8 +76,13 @@ class Soft_Circle {
         OutOfScopeBehavior get_oosb() const {return oosb;};
         void set_oosb(OutOfScopeBehavior new_oosb){oosb = new_oosb;};
 
+        std::size_t get_raw_oosb() const {return (std::size_t) oosb;}
+        void set_raw_oosb(std::size_t new_oosb){oosb = (OutOfScopeBehavior) new_oosb;}
+
         bool is_immovable() const {return immovable;}
+        bool is_tangible() const {return tangible;}
         void set_is_immovable(bool set_value) {immovable = set_value;}
+        void set_is_tangible(bool set_value) {tangible = set_value;}
 
         bool operator==(const Soft_Circle<T> & sc) const {return this == &sc;};
 };

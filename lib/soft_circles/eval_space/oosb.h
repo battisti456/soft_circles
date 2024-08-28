@@ -1,4 +1,5 @@
 #include "./eval_space.h"
+#include "./soft_circle.h"
 
 
 template <class T>
@@ -8,6 +9,16 @@ bool Eval_Space<T>::do_oosb(Soft_Circle<T> * sc, OutOfScopeBehavior oosb){
             oosb_keep_in(sc);
             break;
         case IGNORE:
+            break;
+        case SET_IMMOVABLE:
+            sc->set_is_immovable(false);
+            break;
+        case SET_INTANGIBLE:
+            sc->set_is_tangible(false);
+            break;
+        case SET_IMMOVABLE_AND_INTANGIBLE:
+            sc->set_is_immovable(false);
+            sc->set_is_tangible(false);
             break;
         case UNDEFINED:
         default:

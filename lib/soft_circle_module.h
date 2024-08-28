@@ -12,6 +12,7 @@ using num_type = double;
 using sc_type = Soft_Circle<num_type>;
 using es_type = Eval_Space<num_type>;
 using fc_type = Force_Conveyor<num_type>;
+using vec_type = vec2<num_type>;
 
 
 static PyObject *PyTuple_From_Vec2(vec2<num_type> vec){

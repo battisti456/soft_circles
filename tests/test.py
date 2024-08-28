@@ -2,9 +2,8 @@ from unittest import TestCase, main
 from random import random, seed
 import pygame
 
-from soft_circles.soft_circles_module import Soft_Circle, Eval_Space
-from soft_circles.force_conveyor.point_force import Point_Force
-from soft_circles.force_conveyor.simple_drag import Simple_Drag
+from soft_circles.soft_circles_module import Soft_Circle, Eval_Space, Force_Conveyor
+from soft_circles import OOSB
 
 X_SIZE = 1000
 Y_SIZE = 1000
@@ -27,28 +26,28 @@ class Test(TestCase):
         gs.t = 100000
 
         es.bind(gs)
-        gsf = Point_Force((X_SIZE/2,Y_SIZE/2),G)
-        d = Simple_Drag(D)
-        es.add_force(gsf)
-        es.add_force(d)
+        gsf = Force_Conveyor.make_point_force((X_SIZE/2,Y_SIZE/2),G)
+        d = Force_Conveyor.make_simple_drag(D)
+        es.bind(gsf)
+        es.bind(d)
         gs.is_immovable = True
         gs.position = (X_SIZE/2,Y_SIZE/2)
         for _ in range(NUM):
             sc = Soft_Circle()
             sc.r = 10
             sc.position = (random()*X_SIZE,random()*Y_SIZE)
-            sc.out_of_scope_behavior = OOSB.KEEP_IN
+            sc.oosb = OOSB.KEEP_IN
             es.bind(sc)
         pygame.init()
         surf = pygame.display.set_mode([X_SIZE,Y_SIZE])
         for _ in range(int(TOTAL/SKIP_DISPLAY)):
             es.tick(DT,SKIP_DISPLAY)
             surf.fill("#000000")
-            for sc in es.soft_circles():
+            for sc in es.soft_circles:
                 pygame.draw.circle(surf,"white" if sc.is_immovable else "yellow",sc.position,sc.r,width=1)
-                if not sc.velocity.is_zero():
+                if not sc.velocity == (0,0):
                     pygame.draw.line(surf,"blue",sc.position,sc.position+sc.velocity,width=1)
-                if not sc.acceleration.is_zero():
+                if not sc.acceleration == (0,0):
                     pygame.draw.line(surf,"red",sc.position,sc.position+sc.acceleration,width=1)
             pygame.display.flip()
             pygame.event.pump()

@@ -5,6 +5,11 @@
 #include "_es_bindable.h"
 #include "./soft_circle_module.h"
 
+template<class T>
+using sc_getter = T (sc_type::*)() const;
+template<class T>
+using sc_setter = void (sc_type::*)(T);
+
 
 typedef struct SoftCircleObject{
     _EsBindableObject esbo;
@@ -33,49 +38,29 @@ static PyObject* SoftCircle__on_bound(SoftCircleObject *self, PyObject *arg);
 
 static PyObject* SoftCircle__on_unbound(SoftCircleObject *self, PyObject *arg);
 
-template <num_type (sc_type::*getter_func)() const>
-static PyObject* SoftCircle_get(SoftCircleObject* self, void* closure){
-    return PyFloat_FromDouble(
-        (self->sc->*(getter_func))()
-    );
-}
+template <sc_getter<num_type> getter_func>
+static PyObject* SoftCircle_get(SoftCircleObject* self, void* closure);
 
-template <void (sc_type::*setter_func)(num_type)>
-static int SoftCircle_set(SoftCircleObject* self, PyObject* value, void* closure){
-    if(value == NULL){
-        PyErr_SetString(PyExc_TypeError, "You cannot delete this attribute.");
-        return -1;
-    }
-    if(!PyNumber_Float(value)){
-        PyErr_SetString(PyExc_TypeError, "Value must be a floating point number.");
-        return -1;
-    }
-    (self->sc->*(setter_func))(PyFloat_AS_DOUBLE(value));
-    return 0;
-}
+template <sc_setter<num_type> setter_func>
+static int SoftCircle_set(SoftCircleObject* self, PyObject* value, void* closure);
 
-template <vec2<num_type> (sc_type::*getter_func)() const>
-static PyObject* SoftCircle_vec_get(SoftCircleObject* self, void* closure){
-    vec2<num_type> vec = (self->sc->*(getter_func))();
-    PyObject* to_return = PyTuple_New(2);
-    PyTuple_SetItem(to_return,0,PyFloat_FromDouble(vec.x));
-    PyTuple_SetItem(to_return,1,PyFloat_FromDouble(vec.y));
-    return to_return;
-}
+template <sc_getter<vec_type> getter_func>
+static PyObject* SoftCircle_vec_get(SoftCircleObject* self, void* closure);
 
-template <void (sc_type::*setter_func)(num_type,num_type)>
-static int SoftCircle_vec_set(SoftCircleObject* self, PyObject* value, void* closure){
-    if(value == NULL){
-        PyErr_SetString(PyExc_TypeError, "You cannot delete this attribute.");
-        return -1;
-    }
-    if(!PyTuple_Check(value)){
-        PyErr_SetString(PyExc_TypeError, "Value must be a floating point number.");
-        return -1;
-    }
-    (self->sc->*(setter_func))(PyFloat_AS_DOUBLE(PyTuple_GET_ITEM(value,0)),PyFloat_AS_DOUBLE(PyTuple_GET_ITEM(value,1)));
-    return 0;
-}
+template <sc_setter<vec_type> setter_func>
+static int SoftCircle_vec_set(SoftCircleObject* self, PyObject* value, void* closure);
+
+template <sc_getter<bool> getter_func>
+static PyObject* SoftCircle_bool_get(SoftCircleObject* self, void* closure);
+
+template <sc_setter<bool> setter_func>
+static int SoftCircle_bool_set(SoftCircleObject* self, PyObject* value, void* closure);
+
+template <sc_getter<std::size_t> getter_func>
+static PyObject* SoftCircle_size_get(SoftCircleObject* self, void* closure);
+
+template <sc_setter<std::size_t> setter_func>
+static int SoftCircle_size_set(SoftCircleObject* self, PyObject* value, void* closure);
 
 static PyMemberDef SoftCircle_members[] = {
     {NULL},
@@ -98,6 +83,9 @@ static PyGetSetDef SoftCircle_getsetters[] = {
     {"position", (getter) SoftCircle_vec_get<&sc_type::get_pos>, (setter) SoftCircle_vec_set<&sc_type::set_pos>, "", NULL},
     {"velocity", (getter) SoftCircle_vec_get<&sc_type::get_vel>, (setter) SoftCircle_vec_set<&sc_type::set_vel>, "", NULL},
     {"acceleration", (getter) SoftCircle_vec_get<&sc_type::get_acc>, (setter) SoftCircle_vec_set<&sc_type::set_acc>, "", NULL},
+    {"is_immovable", (getter) SoftCircle_bool_get<&sc_type::is_immovable>, (setter) SoftCircle_bool_set<&sc_type::set_is_immovable>,"",NULL},
+    {"is_tangible", (getter) SoftCircle_bool_get<&sc_type::is_tangible>, (setter) SoftCircle_bool_set<&sc_type::set_is_tangible>,"",NULL},
+    {"oosb", (getter) SoftCircle_size_get<&sc_type::get_raw_oosb>, (setter) SoftCircle_size_set<&sc_type::set_raw_oosb>,"",NULL},
     {NULL}
 };
 
@@ -118,5 +106,6 @@ static PyTypeObject SoftCircleType = {
 };
 
 #include "soft_circle/soft_circle_methods.h"
+#include "soft_circle/soft_circle_getset.h"
 
 #endif
