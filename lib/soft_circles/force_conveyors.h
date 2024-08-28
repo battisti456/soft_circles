@@ -12,12 +12,6 @@ class Force_Conveyor{
 };
 
 template <class T>
-class Reaction_Force:public Force_Conveyor<T>{
-    public:
-    virtual vec2<T> force(const Soft_Circle<T> * sc) const {return vec2<T>();};
-};
-
-template <class T>
 class Soft_Circle_Gravity:public Force_Conveyor<T> {
     private:
     T g;
@@ -58,22 +52,6 @@ class Simple_Drag: public Force_Conveyor<T> {
     vec2<T> force(const Soft_Circle<T> * sc) const override {
         vec2<T> vel = sc->get_vel();
         return -vel.normalize()*c*vel.length()*vel.length();
-    }
-};
-
-template <class T>
-class Simple_Stillness: public Reaction_Force<T> {
-    private:
-    T vel_on;
-    T f_off;
-    public:
-    Simple_Stillness<T>(T _vel_on, T _f_off){vel_on = _vel_on; f_off = _f_off;}
-
-    vec2<T> force(const Soft_Circle<T> * sc) const override {
-        vec2<T> f = sc->get_net_force();
-        if(f.length() >= f_off){return vec2<T>();}
-        if(sc->get_vel().length() > vel_on){return vec2<T>();}
-        return -f;
     }
 };
 

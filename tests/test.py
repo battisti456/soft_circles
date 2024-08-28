@@ -2,8 +2,7 @@ from unittest import TestCase, main
 from random import random, seed
 import pygame
 
-from soft_circles.soft_circle import Soft_Circle, OOSB
-from soft_circles.eval_space import Eval_Space
+from soft_circles.soft_circles_module import Soft_Circle, Eval_Space
 from soft_circles.force_conveyor.point_force import Point_Force
 from soft_circles.force_conveyor.simple_drag import Simple_Drag
 
@@ -21,7 +20,7 @@ D = 1
 class Test(TestCase):
     def test_simple(self):
         seed(1000)
-        es = Eval_Space(x_divs=X_DIVS,y_divs=Y_DIVS,x_size=X_SIZE,y_size=Y_SIZE)
+        es = Eval_Space(X_SIZE,Y_SIZE,X_DIVS,Y_DIVS)
 
         gs = Soft_Circle()
         gs.r = 50

@@ -55,8 +55,6 @@ class Eval_Space{
     public:
         std::vector<Soft_Circle<T>> _soft_circles;
         std::vector<const Force_Conveyor<T>*> forces;
-        std::vector<const Reaction_Force<T>*> reactions;
-
         Eval_Space(T x_size, T y_size, unsigned int x_divs, unsigned int y_divs);
         ~Eval_Space();
 

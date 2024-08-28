@@ -45,9 +45,6 @@ void Eval_Space<T>::eval_main() {
         for(const Force_Conveyor<T> * frc : forces){
             sc.include(frc->force(&sc));
         }
-        for(const Reaction_Force<T> * frc: reactions){
-            sc.include(frc->force(&sc));
-        }
     }
 };
 

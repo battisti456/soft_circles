@@ -2,13 +2,14 @@
 #define SOFT_CIRCLE_OBJECT
 
 #define PY_SSIZE_T_CLEAN
+#include "_es_bindable.h"
 #include "./soft_circle_module.h"
 
-typedef struct SoftCircleObject {
-    PyObject_HEAD
+
+typedef struct SoftCircleObject{
+    _EsBindableObject esbo;
     sc_type* sc = nullptr;
-    PyObject* es = nullptr;
-    std::size_t index;
+    std::size_t index = 0;
 } SoftCircleObject;
 
 static void SoftCircle_dealloc(SoftCircleObject* self){
@@ -28,9 +29,9 @@ static int SoftCircle_init(SoftCircleObject* self, PyObject *args, PyObject *kwd
     return 0;
 };
 
-static PyObject* SoftCircle_get_eval_space(SoftCircleObject* self, void* closure){
-    if(self->es == nullptr){return Py_None;} else {return self->es;}
-}
+static PyObject* SoftCircle__on_bound(SoftCircleObject *self, PyObject *arg);
+
+static PyObject* SoftCircle__on_unbound(SoftCircleObject *self, PyObject *arg);
 
 template <num_type (sc_type::*getter_func)() const>
 static PyObject* SoftCircle_get(SoftCircleObject* self, void* closure){
@@ -81,11 +82,12 @@ static PyMemberDef SoftCircle_members[] = {
 };
 
 static PyMethodDef SoftCircle_methods[] = {
+    {"_on_bound", (PyCFunction) SoftCircle__on_bound, METH_O, ""},
+    {"_on_unbound", (PyCFunction) SoftCircle__on_unbound, METH_O, ""},
     {NULL},
 };
 
 static PyGetSetDef SoftCircle_getsetters[] = {
-    {"eval_space", (getter) SoftCircle_get_eval_space, NULL, "", NULL},
     {"m", (getter) SoftCircle_get<&sc_type::get_m>, (setter) SoftCircle_set<&sc_type::set_m>, "", NULL},
     {"r", (getter) SoftCircle_get<&sc_type::get_r>, (setter) SoftCircle_set<&sc_type::set_r>, "", NULL},
     {"f", (getter) SoftCircle_get<&sc_type::get_f>, (setter) SoftCircle_set<&sc_type::set_f>, "", NULL},
@@ -110,8 +112,11 @@ static PyTypeObject SoftCircleType = {
     .tp_methods = SoftCircle_methods,
     .tp_members = SoftCircle_members,
     .tp_getset = SoftCircle_getsetters,
+    .tp_base = &_EsBindableType,
     .tp_init = (initproc) SoftCircle_init,
     .tp_new = SoftCircle_new,
 };
+
+#include "soft_circle/soft_circle_methods.h"
 
 #endif
