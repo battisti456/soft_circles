@@ -55,12 +55,12 @@ public:
 		return vec2(-x,-y);
 	}
 	
-	vec2& operator+=(vec2& v) {
+	vec2& operator+=(const vec2& v) {
 		x += v.x;
 		y += v.y;
 		return *this;
 	}
-	vec2& operator-=(vec2& v) {
+	vec2& operator-=(const vec2& v) {
 		x -= v.x;
 		y -= v.y;
 		return *this;
@@ -122,7 +122,7 @@ public:
 		return *this / len;
 	}
 	
-	T dist(vec2 v) const {
+	T dist(vec2 const& v) const {
 		vec2 d(v.x - x, v.y - y);
 		return d.length();
 	}
@@ -139,22 +139,23 @@ public:
 		return vec2(y, -x);
 	}
 	
-	static T dot(vec2 const &v1, vec2 const &v2) {
+	static T dot(const vec2 &v1, const vec2 &v2) {
 		return v1.x * v2.x + v1.y * v2.y;
 	}
-	static T cross(vec2 const &v1, vec2 const &v2) {
+	static T cross(const vec2 &v1, const vec2  &v2) {
 		return (v1.x * v2.y) - (v1.y * v2.x);
 	}
+	static const vec2 zero;
 	
 };
 
 template <class T>
-vec2<T> operator*(T val, vec2<T> const & vec){
+vec2<T> operator*(T val, const vec2<T> & vec){
 	return vec*val;
 }
 
-typedef vec2<float> vec2f;
-typedef vec2<double> vec2d;
+template <class T>
+const vec2<T> vec2<T>::zero(0,0);
 
 
 #endif

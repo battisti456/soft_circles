@@ -11,10 +11,9 @@ template<class T>
 using sc_setter = void (sc_type::*)(T);
 
 
-typedef struct SoftCircleObject{
-    _EsBindableObject esbo;
-    sc_type* sc = nullptr;
-    std::size_t index = 0;
+typedef struct SoftCircleObject : _EsBindableObject{
+    sc_type* sc;
+    std::size_t index;
 } SoftCircleObject;
 
 static void SoftCircle_dealloc(SoftCircleObject* self){
@@ -25,6 +24,8 @@ static PyObject* SoftCircle_new(PyTypeObject *type, PyObject *args, PyObject *kw
     SoftCircleObject *self;
     self = (SoftCircleObject*) type->tp_alloc(type, 0);
     if(self != NULL){
+        self->es = nullptr;
+        self->index = 0;
         self->sc = new sc_type();
     }
     return (PyObject*) self;
@@ -105,7 +106,7 @@ static PyTypeObject SoftCircleType = {
     .tp_new = SoftCircle_new,
 };
 
-#include "soft_circle/soft_circle_methods.h"
+#include "soft_circle/soft_circle_binders.h"
 #include "soft_circle/soft_circle_getset.h"
 
 #endif

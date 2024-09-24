@@ -8,13 +8,11 @@
 #include "exceptions.h"
 #include "force_conveyor/force_conveyor_callback.h"
 
-typedef struct ForceConveyorObject {
-    _EsBindableObject esbo;
-    fc_type* fc = nullptr;
+typedef struct ForceConveyorObject : _EsBindableObject{
+    fc_type* fc;
     std::vector<PyObject*> referencing;
 } ForceConveyorObject;
 
-#include "force_conveyor/force_conveyor_make.h"
 
 static void ForceConveyor_dealloc(ForceConveyorObject* self){
     if(self->fc != nullptr){delete self->fc; self->fc = nullptr;}
@@ -26,6 +24,9 @@ static PyObject* ForceConveyor_new(PyTypeObject *type, PyObject *args, PyObject 
 
     self = (ForceConveyorObject*) type->tp_alloc(type, 0);
     if(self != NULL){
+        self->es = nullptr;
+        self->fc = nullptr;
+        self->referencing = std::vector<PyObject*>();
     }
     return (PyObject*) self;
 };
@@ -39,12 +40,18 @@ static PyObject* ForceConveyor_callback(ForceConveyorObject* self, PyObject *arg
     return Py_None;
 };
 
+static PyObject* ForceConveyor__on_bound(ForceConveyorObject *self, PyObject *arg);
+static PyObject* ForceConveyor__on_unbound(ForceConveyorObject *self, PyObject *arg);
+
 static PyMemberDef ForceConveyor_members[] = {
     {NULL},
 };
 
+#include "force_conveyor/force_conveyor_make.h"
 
 static PyMethodDef ForceConveyor_methods[] = {
+    {"_on_bound",(PyCFunction) ForceConveyor__on_bound, METH_O,""},
+    {"_on_unbound", (PyCFunction) ForceConveyor__on_unbound, METH_O,""},
     {"callback", (PyCFunction) ForceConveyor_callback, METH_VARARGS, ""},
     {"make_callback", (PyCFunction) ForceConveyor_make_callback, METH_NOARGS | METH_CLASS, ""},
     {"make_soft_circle_gravity", (PyCFunction) ForceConveyor_make_soft_circle_gravity, METH_VARARGS | METH_CLASS, ""},
@@ -72,5 +79,7 @@ static PyTypeObject ForceConveyorType = {
     .tp_init = (initproc) ForceConveyor_init,
     .tp_new = ForceConveyor_new,
 };
+
+#include "force_conveyor/force_conveyors_binders.h"
 
 #endif

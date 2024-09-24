@@ -5,6 +5,8 @@
 #include "soft_circle.h"
 #include <cmath>
 
+namespace softcircles {
+
 template <class T>
 class Force_Conveyor{
     public:
@@ -54,5 +56,7 @@ class Simple_Drag: public Force_Conveyor<T> {
         return -vel.normalize()*c*vel.length()*vel.length();
     }
 };
+
+}
 
 #endif

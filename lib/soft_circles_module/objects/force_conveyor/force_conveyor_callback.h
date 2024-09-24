@@ -6,6 +6,8 @@
 #include "./soft_circle.h"
 #include <Python.h>
 
+using namespace softcircles;
+
 template <class T>
 class Python_Callback_Force_Conveyor:public Force_Conveyor<T> {
     private:

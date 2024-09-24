@@ -8,7 +8,7 @@ def main():
                 [
                     "lib/soft_circles_module.cpp"
                 ],
-                include_dirs=['lib'],
+                include_dirs=['lib','Quadtree/include'],
                 extra_compile_args=["/std:c++20"]
             )
         ]

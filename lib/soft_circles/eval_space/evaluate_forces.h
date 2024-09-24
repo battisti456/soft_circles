@@ -1,5 +1,6 @@
-#include "./eval_space.h"
+#include "../eval_space.h"
 #include <cmath>
+#include "Quadtree.h"
 
 #if defined DEBUG_EVAL_SPACE_EVALUATE_FORCES
     #define D(x) x;
@@ -7,46 +8,50 @@
     #define D(x)
 #endif
 
+namespace softcircles {
+
+template<class T>
+const auto affect_box = [](Soft_Circle<T> *sc){
+    vec2<T> pos = sc->get_pos();
+    T d = sc->get_r()*2;
+    return quadtree::Box<T>(pos.x-sc->get_r(),pos.y+sc->get_r(),d,d);
+};
+
+template <class T>
+using QuadTree = quadtree::Quadtree<Soft_Circle<T>*,decltype(affect_box<T>),std::equal_to<Soft_Circle<T>*>,T>;
+
+template <class T>
+void Eval_Space<T>::evaluate_forces() {
+    D(printf("Evaluating forces...\n"))
+    eval_main();
+};
+
 
 template <class T>
 void Eval_Space<T>::eval_main() {
-    Soft_Circle<T> *sc, *o_sc;
-    Soft_Circle_Link<T> *scl, *o_scl;
-    for(unsigned int j = 0; j < num_div_x; j++) {
-        for(unsigned int k = 0; k < num_div_y; k++) {
-            //D(printf("Analyzing block (%d,%d) -> div %d\n",j,k,j+k*num_div_x))
-            scl = divs[j+k*num_div_x];
-            while(scl != nullptr){
-                sc = scl->get_soft_circle();
-                for(unsigned int o_j = j-1; o_j<=j+1;o_j++){
-                    if(o_j < 0 || o_j >= num_div_x){continue;};
-                    for(unsigned int o_k = k -1; o_k <= k+1;o_k++){
-                        if(o_k < 0 || o_k >= num_div_y){continue;};
-                        //D(printf("Looking at neighbor (%d,%d) -> div %d\n",o_j,o_k,o_j+o_k*num_div_x))
-                        o_scl=divs[o_j+o_k*num_div_x];
-                        while(o_scl != nullptr){
-                            o_sc = o_scl->get_soft_circle();
-                            if(!get_interacted(sc,o_sc)) {
-                                sc->include(o_sc); 
-                                set_interacted(sc,o_sc);
-                                D(printf("sc%llu and sc%llu interacted\n",sc,o_sc))
-                            };
-                            //D(printf("Other from %lu -> %lu\n",o_scl,o_scl->get_next()))
-                            o_scl = o_scl->get_next();
-                        }
-                    }
-                }
-                //D(printf("Main from %lu -> %lu\n",scl,scl->get_next()))
-                scl = scl->get_next();
-            }
-        }
+    D(printf("Making Quadtree...\n"))
+    QuadTree<T> quads(eval_box,affect_box<T>);
+    for (Soft_Circle<T>& sc : _soft_circles){
+        quads.add(&sc);
     }
-    for(Soft_Circle<T> &sc: _soft_circles) {
-        for(const Force_Conveyor<T> * frc : forces){
-            sc.include(frc->force(&sc));
+    auto interactions = quads.findAllIntersections();
+    vec2<T> force;
+    D(printf("Evaluating soft circle interactions...\n"))
+    for(std::pair<Soft_Circle<T>*,Soft_Circle<T>*> pair : interactions){
+        force = vec2<T>();
+        force += pair.first->repelling_force(pair.second);
+        force += pair.first->friction_force(pair.second);
+        pair.first->include(force);
+        pair.second->include(-force);
+    }
+    D(printf("Applying the forces...\n"))
+    for(Soft_Circle<T> & sc : _soft_circles){
+        for(const Force_Conveyor<T> * fc : forces){
+            sc.include(fc->force(&sc));
         }
     }
 };
 
+}
 
 #undef D

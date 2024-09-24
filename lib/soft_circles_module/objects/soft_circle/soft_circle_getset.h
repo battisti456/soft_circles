@@ -16,11 +16,9 @@ static int SoftCircle_set<setter_func>(SoftCircleObject* self, PyObject* value, 
         PyErr_SetString(PyExc_TypeError, "You cannot delete this attribute.");
         return -1;
     }
-    if(!PyNumber_Float(value)){
-        PyErr_SetString(PyExc_TypeError, "Value must be a floating point number.");
-        return -1;
-    }
-    (self->sc->*(setter_func))(PyFloat_AS_DOUBLE(value));
+    num_type val;
+    if(!py_to_num(value,val)){return -1;}
+    (self->sc->*(setter_func))(val);
     return 0;
 }
 
@@ -37,11 +35,9 @@ static int SoftCircle_bool_set<setter_func>(SoftCircleObject* self, PyObject* va
         PyErr_SetString(PyExc_TypeError, "You cannot delete this attribute.");
         return -1;
     }
-    if(!PyBool_Check(value)){
-        PyErr_SetString(PyExc_TypeError, "Value must be a boolean.");
-        return -1;
-    }
-    (self->sc->*(setter_func))((bool) PyObject_IsTrue(value));
+    int val = PyObject_IsTrue(value);
+    if(val == -1){return -1;}
+    (self->sc->*(setter_func))((bool) val);
     return 0;
 }
 
@@ -59,7 +55,7 @@ static int SoftCircle_size_set<setter_func>(SoftCircleObject* self, PyObject* va
         return -1;
     }
     if(!PyLong_Check(value)){
-        PyErr_SetString(PyExc_TypeError, "Value must be a boolean.");
+        PyErr_SetString(PyExc_TypeError, "Value must be an integer.");
         return -1;
     }
     (self->sc->*(setter_func))(PyLong_AsSize_t(value));
@@ -81,11 +77,9 @@ static int SoftCircle_vec_set<setter_func>(SoftCircleObject* self, PyObject* val
         PyErr_SetString(PyExc_TypeError, "You cannot delete this attribute.");
         return -1;
     }
-    if(!PyTuple_Check(value)){
-        PyErr_SetString(PyExc_TypeError, "Value must be a floating point number.");
-        return -1;
-    }
-    (self->sc->*(setter_func))(vec_type(PyFloat_AS_DOUBLE(PyTuple_GET_ITEM(value,0)),PyFloat_AS_DOUBLE(PyTuple_GET_ITEM(value,1))));
+    vec_type vec;
+    if(!py_to_vec(value,vec)){return -1;}
+    (self->sc->*(setter_func))(vec);
     return 0;
 }
 

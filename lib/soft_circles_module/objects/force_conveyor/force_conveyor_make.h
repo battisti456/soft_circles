@@ -3,8 +3,10 @@
 
 #include "./force_conveyor.h"
 
+using namespace softcircles;
+
 static ForceConveyorObject* ForceConveyor_make(PyTypeObject *type){
-    return (ForceConveyorObject*) _PyObject_New(type);
+    return (ForceConveyorObject*) ForceConveyor_new(type,NULL,NULL);
 };
 
 static PyObject* ForceConveyor_make_callback(PyTypeObject *type, PyObject *args){

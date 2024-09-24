@@ -1,6 +1,23 @@
-#include "./eval_space.h"
-#include "./soft_circle.h"
+#include "../eval_space.h"
 
+#if defined DEBUG_EVAL_SPACE_OOSB
+    #define D(x) x;
+#else
+    #define D(x)
+#endif
+
+namespace softcircles {
+
+template <class T>
+void Eval_Space<T>::actuate_out_of_scope_behavior(){
+    D(printf("Actuating out of scope behavior...\n"))
+    for(Soft_Circle<T> &sc : _soft_circles){
+        if(!out_of_scope(&sc)){continue;}
+        if(do_oosb(&sc,sc.get_oosb())){continue;}//try to follow sc oosb
+        if(do_oosb(&sc,oosb)){continue;}//try to follow own oosb
+        do_oosb(&sc,IGNORE);//else, just ignore
+    }
+}
 
 template <class T>
 bool Eval_Space<T>::do_oosb(Soft_Circle<T> * sc, OutOfScopeBehavior oosb){
@@ -31,20 +48,24 @@ template <class T>
 void Eval_Space<T>::oosb_keep_in(Soft_Circle<T> * sc){
     vec2<T> pos = sc->get_pos();
     vec2<T> vel = sc->get_vel();
-    if(pos.x < 0){
-        pos.x = 0;
+    if(pos.x < left){
+        pos.x = left;
         vel.x = 0;
-    } else if (pos.x > x){
-        pos.x = x;
+    } else if (pos.x > right){
+        pos.x = right;
         vel.x = 0;
     }
-    if (pos.y < 0){
-        pos.y = 0;
+    if (pos.y < down){
+        pos.y = down;
         vel.y = 0;
-    } else if (pos.y > y){
-        pos.y = y;
+    } else if (pos.y > top){
+        pos.y = top;
         vel.y = 0;
     }
     sc->set_pos(pos);
     sc->set_vel(vel);
 }
+
+}
+
+#undef D

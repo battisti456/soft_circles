@@ -7,38 +7,41 @@
 #include "soft_circles/soft_circle.h"
 #include "soft_circles/eval_space.h"
 #include "soft_circles/force_conveyors.h"
+#include "soft_circles/keeper.h"
 
 using num_type = double;
-using sc_type = Soft_Circle<num_type>;
-using es_type = Eval_Space<num_type>;
-using fc_type = Force_Conveyor<num_type>;
+using sc_type = softcircles::Soft_Circle<num_type>;
+using es_type = softcircles::Eval_Space<num_type>;
+using fc_type = softcircles::Force_Conveyor<num_type>;
+using kp_type = softcircles::Keeper<num_type>;
 using vec_type = vec2<num_type>;
 
+bool py_to_num(PyObject* value, num_type& val){
+    if(PyLong_Check(value)){
+        val = (num_type) PyLong_AsLong(value);
+    } else if (PyFloat_Check(value)){
+        val = (num_type) PyFloat_AsDouble(value);
+    } else {
+        PyErr_SetString(PyExc_TypeError, "Value was not a compatible number type.");
+        return false;
+    }
+    return true;
+}
 
-static PyObject *PyTuple_From_Vec2(vec2<num_type> vec){
-    PyObject* to_return = PyTuple_New(2);
-    PyTuple_SetItem(to_return,0,PyFloat_FromDouble(vec.x));
-    PyTuple_SetItem(to_return,1,PyFloat_FromDouble(vec.y));
-    return to_return;
-};
-
-template <class T>
-vec2<T> Vec2_From_PyTuple(PyObject* tuple){
-    return vec2<T>(
-        (T) PyFloat_AsDouble(
-            PyTuple_GetItem(tuple,0)
-        ),
-        (T) PyFloat_AsDouble(
-            PyTuple_GetItem(tuple,1)
-        )
-    );
-};
+bool py_to_vec(PyObject* value, vec_type& val){
+    if(!PySequence_Check(value)){PyErr_SetString(PyExc_TypeError,"Value is not sequence."); return false;}
+    if(PySequence_Size(value) != 2){PyErr_SetString(PyExc_IndexError, "Value is not of length 2."); return false;}
+    if(!py_to_num(PySequence_Fast_GET_ITEM(value,0),val.x)){return false;}
+    if(!py_to_num(PySequence_Fast_GET_ITEM(value,1),val.y)){return false;}
+    return true;
+}
 
 
 #include "soft_circles_module/objects/exceptions.h"
 #include "soft_circles_module/objects/_es_bindable.h"
 #include "soft_circles_module/objects/soft_circle.h"
 #include "soft_circles_module/objects/force_conveyor.h"
+#include "soft_circles_module/objects/keeper.h"
 #include "soft_circles_module/objects/eval_space.h"
 
 #endif

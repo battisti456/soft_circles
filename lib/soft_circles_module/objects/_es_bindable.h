@@ -13,7 +13,7 @@ typedef struct {
 
 typedef struct _EsBindableObject {
     PyObject_HEAD;
-    _Binder* es = nullptr;
+    _Binder* es;
 } _EsBindableObject;
 
 static void _EsBindable_dealloc(_EsBindableObject* self){
@@ -25,6 +25,7 @@ static PyObject* _EsBindable_new(PyTypeObject *type, PyObject *args, PyObject *k
 
     self = (_EsBindableObject*) type->tp_alloc(type, 0);
     if(self != NULL){
+        self->es = nullptr;
     }
     return (PyObject*) self;
 };
@@ -36,7 +37,7 @@ static int _EsBindable_init(_EsBindableObject* self, PyObject *args, PyObject *k
 
 static PyObject* _EsBindable__on_bound(_EsBindableObject *self, _Binder * binder){
     if(self->es != nullptr){
-        PyErr_SetString(BindException, "This Soft_Circle is already bound.");
+        PyErr_SetString(BindException, "This _Es_Bindable is already bound.");
         return NULL;
     }
     self->es = binder;
@@ -48,7 +49,7 @@ static PyObject* _EsBindable__on_bound(_EsBindableObject *self, _Binder * binder
 
 static PyObject* _EsBindable__on_unbound(_EsBindableObject *self, _Binder * binder){
     if(binder != self->es){
-        PyErr_SetString(BindException, "Attempting to unbind an Eval_Space object that was not bound to this _ES_Bindable.");
+        PyErr_SetString(BindException, "Attempting to unbind an Eval_Space object that was not bound to this _Es_Bindable.");
         return NULL;
     }
     Py_DECREF(self);

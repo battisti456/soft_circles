@@ -1,3 +1,5 @@
+from typing import Iterable
+
 class BindException(Exception):
     ...
 
@@ -41,9 +43,22 @@ class Force_Conveyor(_Es_Bindable):
     def make_simple_drag(cls,c:float,/) -> 'Force_Conveyor':
         ...
 
+class Keeper(_Es_Bindable):
+    @classmethod
+    def make_box(
+        cls,
+        mca: float,
+        mct: float,
+        left: float,
+        up: float,
+        right: float,
+        down: float
+    )->'Keeper':
+        ...
+
 class Eval_Space:
     oosb:int
-    def __new__(cls,x_size:float,y_size:float,x_divs:int,y_divs:int,/) -> 'Eval_Space':
+    def __new__(cls,left:float,top:float,right:float,bottom:float,/) -> 'Eval_Space':
         ...
     def bind(self,bindable:_Es_Bindable,/) -> None:
         ...
@@ -51,12 +66,14 @@ class Eval_Space:
         ...
     def tick(self,dt:float,num:int,/) -> None:
         ...
-    @property
-    def bound(self) -> 'tuple[_Es_Bindable,...]':
+    def set_dim(self,tlx:float,tly:float,brx:float,bry:float,/) -> None:
         ...
     @property
-    def soft_circles(self) -> 'tuple[Soft_Circle,...]':
+    def bound(self) -> 'Iterable[_Es_Bindable]':
         ...
     @property
-    def force_conveyors(self) -> 'tuple[Force_Conveyor,...]':
+    def soft_circles(self) -> 'Iterable[Soft_Circle]':
+        ...
+    @property
+    def force_conveyors(self) -> 'Iterable[Force_Conveyor]':
         ...

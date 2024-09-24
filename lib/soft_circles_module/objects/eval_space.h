@@ -4,14 +4,13 @@
 #define PY_SSIZE_T_CLEAN
 #include "soft_circle_module.h"
 #include "_es_bindable.h"
-#include "soft_circle.h"
-#include "force_conveyor.h"
 #include "exceptions.h"
 
 typedef struct EvalSpaceObject : _Binder{
     es_type es;
 } EvalSpaceObject;
 
+EvalSpaceObject* get_eso_for_binding(PyObject* obj);
 
 static void EvalSpace_dealloc(EvalSpaceObject* self){
     Py_TYPE(self)->tp_free((PyObject*) self);
@@ -20,13 +19,13 @@ static void EvalSpace_dealloc(EvalSpaceObject* self){
 static PyObject* EvalSpace_new(PyTypeObject *type, PyObject *args, PyObject *kwds){
     EvalSpaceObject *self;
 
-    double x_size, y_size;
-    unsigned int x_divs, y_divs;
+    double x_center, y_center, x_size, y_size;
 
     self = (EvalSpaceObject*) type->tp_alloc(type, 0);
     if(self != NULL){
-        PyArg_ParseTuple(args,"ddII",&x_size,&y_size,&x_divs,&y_divs);
-        self->es = es_type(x_size,y_size,x_divs,y_divs);
+        self->bound = std::vector<PyObject*>();
+        PyArg_ParseTuple(args,"dddd",&x_center,&y_center,&x_size,&y_size);
+        self->es = es_type(x_center,y_center,x_size,y_size);
     }
     return (PyObject*) self;
 };
@@ -64,17 +63,15 @@ static PyObject* EvalSpace_tick(EvalSpaceObject* self, PyObject* args){
     return Py_None;
 }
 
-template <PyObject* type>
-static PyObject* EvalSpace_get_bound(EvalSpaceObject* self, void* closure){
-    PyObject* to_return = PyTuple_New(self->bound.size());
-    std::size_t index = 0;
-    for(PyObject* pyo : self->bound){
-        if(!PyObject_IsInstance(pyo,type)){continue;}
-        PySequence_SetItem(to_return,index++,pyo);
-    }
-    _PyTuple_Resize(&to_return,index);
-    return to_return;
+static PyObject* EvalSpace_set_dim(EvalSpaceObject* self, PyObject* args){
+    double left,top,right,down;
+    if(!PyArg_ParseTuple(args,"dddd",&left,&top,&right,&down)){return NULL;}
+    self->es.set_dim(left,top,right,down);
+    return Py_None;
 }
+
+template <PyObject* type>
+static PyObject* EvalSpace_get_bound(EvalSpaceObject* self, void* closure);
 
 static PyObject* EvalSpace_get_oosb(EvalSpaceObject* self, void* closure){
     return PyLong_FromSize_t((std::size_t) self->es.get_oosb());
@@ -85,7 +82,7 @@ static int EvalSpace_set_oosb(EvalSpaceObject* self, PyObject* val, void* closur
         PyErr_SetString(PyExc_TypeError, "Value must be a boolean.");
         return -1;
     }
-    self->es.set_oosb((OutOfScopeBehavior) PyLong_AsSize_t(val));
+    self->es.set_oosb((softcircles::OutOfScopeBehavior) PyLong_AsSize_t(val));
     return 0;
 }
 
@@ -93,8 +90,12 @@ static PyMethodDef EvalSpace_methods[] = {
     {"bind", (PyCFunction) EvalSpace_bind, METH_VARARGS, ""},
     {"unbind", (PyCFunction) EvalSpace_unbind, METH_VARARGS, ""},
     {"tick", (PyCFunction) EvalSpace_tick, METH_VARARGS, ""},
+    {"set_dim", (PyCFunction) EvalSpace_set_dim, METH_VARARGS, ""},
     {NULL},
 };
+
+#include "soft_circle.h"
+#include "force_conveyor.h"
 
 static PyGetSetDef EvalSpace_getsetters[] = {
     {"bound", (getter) EvalSpace_get_bound<(PyObject*) &_EsBindableType>,NULL,"",NULL},
@@ -118,5 +119,15 @@ static PyTypeObject EvalSpaceType = {
     .tp_init = (initproc) EvalSpace_init,
     .tp_new = EvalSpace_new,
 };
+
+EvalSpaceObject* get_eso_for_binding(PyObject* obj){
+    if(!PyObject_IsInstance(obj,(PyObject*) &EvalSpaceType)){
+        PyErr_SetString(PyExc_TypeError,"Binding object must be of type Eval_Space.");
+        return NULL;
+    }
+    return (EvalSpaceObject*) obj;
+}
+
+#include "eval_space/get_bound.h"
 
 #endif
